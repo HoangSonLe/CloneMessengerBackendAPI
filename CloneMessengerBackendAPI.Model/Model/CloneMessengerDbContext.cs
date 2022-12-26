@@ -27,10 +27,6 @@ namespace CloneMessengerBackendAPI.Model.Model
                 .HasForeignKey(e => e.GroupId);
 
             modelBuilder.Entity<ChatGroup>()
-                .HasOptional(e => e.ChatMessage)
-                .WithMany(e => e.ChatGroups);
-
-            modelBuilder.Entity<ChatGroup>()
                 .HasRequired(e => e.User)
                 .WithRequiredPrincipal()
                 .WillCascadeOnDelete(false);

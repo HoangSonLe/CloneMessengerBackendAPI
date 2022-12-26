@@ -41,7 +41,6 @@ namespace CloneMessengerBackendAPI.Model.Model
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UserLastReadMessage> UserLastReadMessages { get; set; }
 
-        public virtual ChatMessage ChatMessage { get; set; }
         public virtual User User { get; set; }
 
     }

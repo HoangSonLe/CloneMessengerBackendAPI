@@ -52,10 +52,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Serviecs\BaseService.cs" />
+    <Compile Include="Serviecs\MessageService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CloneMessengerBackendAPI.Model\CloneMessengerBackendAPI.Model.csproj">
+      <Project>{c0db8926-e26c-4ea4-b715-7fc42194c4a9}</Project>
+      <Name>CloneMessengerBackendAPI.Model</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

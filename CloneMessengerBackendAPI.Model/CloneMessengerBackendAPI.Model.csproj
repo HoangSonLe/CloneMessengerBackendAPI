@@ -68,6 +68,10 @@
     <Compile Include="Migrations\202212251556322_Add_UserTable.designer.cs">
       <DependentUpon>202212251556322_Add_UserTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202212261905264_FixDatabaseChatGroup.cs" />
+    <Compile Include="Migrations\202212261905264_FixDatabaseChatGroup.designer.cs">
+      <DependentUpon>202212261905264_FixDatabaseChatGroup.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\ChatFileAttachment.cs" />
     <Compile Include="Model\User.cs" />
@@ -89,6 +93,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202212251556322_Add_UserTable.resx">
       <DependentUpon>202212251556322_Add_UserTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212261905264_FixDatabaseChatGroup.resx">
+      <DependentUpon>202212261905264_FixDatabaseChatGroup.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
