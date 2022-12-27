@@ -10,6 +10,7 @@ namespace CloneMessengerBackendAPI.Model.Model
     public partial class ChatTextMessage
     {
         [Key]
+        [ForeignKey(nameof(ChatMessage))]
         public Guid ChatMessageId { get; set; }
 
         public string Text { get; set; }

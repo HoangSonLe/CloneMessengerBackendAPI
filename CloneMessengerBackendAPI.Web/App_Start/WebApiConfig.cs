@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Serialization;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,22 +11,21 @@ namespace CloneMessengerBackendAPI.Web
 {
     public static class WebApiConfig
     {
-        public class CustomJsonFormatter : JsonMediaTypeFormatter
-        {
-            public CustomJsonFormatter()
-            {
-                this.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
-            }
-
-            public override void SetDefaultContentHeaders(Type type, HttpContentHeaders headers, MediaTypeHeaderValue mediaType)
-            {
-                base.SetDefaultContentHeaders(type, headers, mediaType);
-                headers.ContentType = new MediaTypeHeaderValue("application/json");
-            }
-        }
         public static void Register(HttpConfiguration config)
         {
             // Web API configuration and services
+            config.Formatters.Remove(config.Formatters.XmlFormatter);
+
+            // setup camel-case for property names
+            var settings = GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings;
+            settings.Formatting = Newtonsoft.Json.Formatting.Indented;
+            settings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+            settings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
+            settings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+            settings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Error;
+            settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
+
             // Web API routes
             config.MapHttpAttributeRoutes();
 
@@ -34,9 +34,7 @@ namespace CloneMessengerBackendAPI.Web
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
-            config.Formatters.Add(new CustomJsonFormatter());
-            config.Formatters.JsonFormatter.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
-            config.Formatters.JsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
         }
     }
 }

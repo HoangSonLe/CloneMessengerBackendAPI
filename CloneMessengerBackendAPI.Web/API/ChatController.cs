@@ -1,4 +1,6 @@
 ﻿using CloneMessengerBackendAPI.Model.Model;
+using CloneMessengerBackendAPI.Service.Models;
+using CloneMessengerBackendAPI.Service.Models.ViewModels;
 using CloneMessengerBackendAPI.Service.Serviecs;
 using System;
 using System.Collections.Generic;
@@ -19,9 +21,9 @@ namespace CloneMessengerBackendAPI.Web.API
 
         [HttpGet]
         // GET: ChatGroup
-        public async Task<List<ChatGroup>> GetAllChatGroup()
+        public async Task<List<ChatGroupViewModel>> GetAllChatGroup()
         {
-            var result = await MessageServices.GetChatGroups();
+            var result = await MessageServices.GetChatGroups(new ChatMessageFilterModel());
             return result;
         }
     }

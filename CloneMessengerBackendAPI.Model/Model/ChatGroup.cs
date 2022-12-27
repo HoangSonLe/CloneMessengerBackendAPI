@@ -20,11 +20,13 @@ namespace CloneMessengerBackendAPI.Model.Model
         public Guid Id { get; set; }
 
         public string Name { get; set; }
-        [ForeignKey(nameof(User))]
 
+        [ForeignKey(nameof(User))]
         public Guid CreatedBy { get; set; }
 
         public DateTime CreatedDate { get; set; }
+
+        public Guid? LastMessageId { get; set; }
 
         [Required]
         public string UserIds { get; set; }
@@ -42,6 +44,8 @@ namespace CloneMessengerBackendAPI.Model.Model
         public virtual ICollection<UserLastReadMessage> UserLastReadMessages { get; set; }
 
         public virtual User User { get; set; }
+
+        public virtual ChatMessage LastChatMessage { get; set; }
 
     }
 }

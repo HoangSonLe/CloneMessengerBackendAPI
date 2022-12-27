@@ -16,12 +16,16 @@ namespace CloneMessengerBackendAPI.Model.Model
 
         [Key]
         [Column(Order = 1)]
+        [ForeignKey(nameof(ChatGroup))]
         public Guid ChatGroupId { get; set; }
+
+        [ForeignKey(nameof(ChatMessage))]
 
         public Guid LastReadMessageId { get; set; }
 
         public DateTime Time { get; set; }
 
+        public virtual ChatMessage ChatMessage { get; set; }
         public virtual ChatGroup ChatGroup { get; set; }
         public virtual User User { get; set; }
     }

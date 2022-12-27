@@ -60,17 +60,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helper\StringHelper.cs" />
-    <Compile Include="Migrations\202212251302506_InitialCreate.cs" />
-    <Compile Include="Migrations\202212251302506_InitialCreate.designer.cs">
-      <DependentUpon>202212251302506_InitialCreate.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202212251556322_Add_UserTable.cs" />
-    <Compile Include="Migrations\202212251556322_Add_UserTable.designer.cs">
-      <DependentUpon>202212251556322_Add_UserTable.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202212261905264_FixDatabaseChatGroup.cs" />
-    <Compile Include="Migrations\202212261905264_FixDatabaseChatGroup.designer.cs">
-      <DependentUpon>202212261905264_FixDatabaseChatGroup.cs</DependentUpon>
+    <Compile Include="Migrations\202212271008199_InitCreate.cs" />
+    <Compile Include="Migrations\202212271008199_InitCreate.designer.cs">
+      <DependentUpon>202212271008199_InitCreate.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\ChatFileAttachment.cs" />
@@ -88,14 +80,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202212251302506_InitialCreate.resx">
-      <DependentUpon>202212251302506_InitialCreate.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202212251556322_Add_UserTable.resx">
-      <DependentUpon>202212251556322_Add_UserTable.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202212261905264_FixDatabaseChatGroup.resx">
-      <DependentUpon>202212261905264_FixDatabaseChatGroup.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202212271008199_InitCreate.resx">
+      <DependentUpon>202212271008199_InitCreate.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

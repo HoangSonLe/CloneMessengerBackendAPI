@@ -14,6 +14,7 @@ namespace CloneMessengerBackendAPI.Model.Model
 
         public virtual DbSet<ChatFileAttachment> ChatFileAttachments { get; set; }
         public virtual DbSet<ChatGroup> ChatGroups { get; set; }
+        public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<ChatMember> ChatMembers { get; set; }
         public virtual DbSet<ChatMessage> ChatMessages { get; set; }
         public virtual DbSet<ChatTextMessage> ChatTextMessages { get; set; }
@@ -22,30 +23,42 @@ namespace CloneMessengerBackendAPI.Model.Model
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ChatGroup>()
-                .HasMany(e => e.ChatMessages)
-                .WithRequired(e => e.ChatGroup)
-                .HasForeignKey(e => e.GroupId);
+                .HasOptional(e => e.LastChatMessage)
+                .WithMany().HasForeignKey(e=>e.LastMessageId)
+                .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<ChatGroup>()
                 .HasRequired(e => e.User)
-                .WithRequiredPrincipal()
+                .WithMany(e => e.ChatGroups)
+                .HasForeignKey(e => e.CreatedBy)
                 .WillCascadeOnDelete(false);
 
-            modelBuilder.Entity<ChatMessage>()
-                .HasOptional(e => e.ChatTextMessage)
-                .WithRequired(e => e.ChatMessage)
-                .WillCascadeOnDelete();
+            modelBuilder.Entity<ChatMember>()
+                .HasKey(e => new { e.UserId, e.ChatGroupId });
 
             modelBuilder.Entity<ChatMember>()
                 .HasRequired(e => e.AddedUser)
-                .WithRequiredPrincipal()
+                .WithMany()
+                .HasForeignKey(e=>e.AddedBy)
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<ChatMember>()
                 .HasRequired(e => e.User)
-                .WithRequiredPrincipal()
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
                 .WillCascadeOnDelete(false);
 
+            modelBuilder.Entity<UserLastReadMessage>()
+                .HasRequired(e => e.ChatGroup)
+                .WithMany(e => e.UserLastReadMessages)
+                .HasForeignKey(e=> e.ChatGroupId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<UserLastReadMessage>()
+                .HasRequired(e => e.User)
+                .WithMany(e => e.UserLastReadMessages)
+                .HasForeignKey(e => e.UserId)
+                .WillCascadeOnDelete(false);
         }
     }
 }

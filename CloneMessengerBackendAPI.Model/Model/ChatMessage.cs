@@ -14,9 +14,9 @@ namespace CloneMessengerBackendAPI.Model.Model
         {
             ChatFileAttachments = new HashSet<ChatFileAttachment>();
         }
-
         public Guid Id { get; set; }
 
+        [ForeignKey(nameof(ChatGroup))]
         public Guid GroupId { get; set; }
 
         [ForeignKey(nameof(User))]
@@ -28,6 +28,7 @@ namespace CloneMessengerBackendAPI.Model.Model
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ChatFileAttachment> ChatFileAttachments { get; set; }
+
 
         public virtual ChatGroup ChatGroup { get; set; }
 

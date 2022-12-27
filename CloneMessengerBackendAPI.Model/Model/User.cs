@@ -19,7 +19,7 @@ namespace CloneMessengerBackendAPI.Model.Model
 
         public Guid Id { get; set; }
 
-        //[Column(TypeName="varchar")]
+        [Column(TypeName = "varchar")]
         public string UserName { get; set; }
         public byte[] MD5Password { get; set; }
 

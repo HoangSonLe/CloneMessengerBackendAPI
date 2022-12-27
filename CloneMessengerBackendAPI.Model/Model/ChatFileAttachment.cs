@@ -11,6 +11,7 @@ namespace CloneMessengerBackendAPI.Model.Model
     {
         [Key]
         [Column(Order = 0)]
+        [ForeignKey(nameof(ChatMessage))]
         public Guid ChatMessageId { get; set; }
 
         [Key]

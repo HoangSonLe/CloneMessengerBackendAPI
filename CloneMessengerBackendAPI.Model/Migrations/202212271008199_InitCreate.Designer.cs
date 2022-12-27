@@ -7,13 +7,13 @@ namespace CloneMessengerBackendAPI.Model.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.4.4")]
-    public sealed partial class InitialCreate : IMigrationMetadata
+    public sealed partial class InitCreate : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(InitialCreate));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(InitCreate));
         
         string IMigrationMetadata.Id
         {
-            get { return "202212251302506_InitialCreate"; }
+            get { return "202212271008199_InitCreate"; }
         }
         
         string IMigrationMetadata.Source
