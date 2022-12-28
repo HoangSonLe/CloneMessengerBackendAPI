@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Linq;
 
 namespace CloneMessengerBackendAPI.Model.Model
@@ -10,6 +11,9 @@ namespace CloneMessengerBackendAPI.Model.Model
         public CloneMessengerDbContext()
             : base("name=CloneMessengerDataContext")
         {
+#if DEBUG
+            this.Database.Log = (s) => { Debug.WriteLine(s); };
+#endif
         }
 
         public virtual DbSet<ChatFileAttachment> ChatFileAttachments { get; set; }

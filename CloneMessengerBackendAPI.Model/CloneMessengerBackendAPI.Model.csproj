@@ -59,7 +59,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Helper\StringHelper.cs" />
     <Compile Include="Migrations\202212271008199_InitCreate.cs" />
     <Compile Include="Migrations\202212271008199_InitCreate.designer.cs">
       <DependentUpon>202212271008199_InitCreate.cs</DependentUpon>

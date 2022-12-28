@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CloneMessengerBackendAPI.Model.Helper
+namespace CloneMessengerBackendAPI.Service.Helper
 {
     public static class StringHelper
     {

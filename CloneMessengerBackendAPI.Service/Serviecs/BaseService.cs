@@ -13,7 +13,6 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         {
             get { return new CloneMessengerDbContext(); }
         }
-      
         public void Dispose()
         {
             DbContext.Dispose();
