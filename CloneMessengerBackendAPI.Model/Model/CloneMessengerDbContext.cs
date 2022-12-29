@@ -23,7 +23,6 @@ namespace CloneMessengerBackendAPI.Model.Model
         public virtual DbSet<ChatMessage> ChatMessages { get; set; }
         public virtual DbSet<ChatTextMessage> ChatTextMessages { get; set; }
         public virtual DbSet<UserLastReadMessage> UserLastReadMessages { get; set; }
-        public virtual DbSet<UserReadMessageInfor> UserReadMessageInfors { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -64,21 +63,6 @@ namespace CloneMessengerBackendAPI.Model.Model
                 .WithMany(e => e.UserLastReadMessages)
                 .HasForeignKey(e => e.UserId)
                 .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<UserReadMessageInfor>()
-                .HasKey(e => new { e.UserId, e.ChatMessageId });
-
-            modelBuilder.Entity<UserReadMessageInfor>()
-                .HasRequired(e => e.User)
-                .WithMany()
-                .HasForeignKey(e => e.UserId)
-                .WillCascadeOnDelete(false);
-
-            modelBuilder.Entity<UserReadMessageInfor>()
-               .HasRequired(e => e.ChatMessage)
-               .WithMany()
-               .HasForeignKey(e => e.ChatMessageId)
-               .WillCascadeOnDelete(false);
         }
     }
 }

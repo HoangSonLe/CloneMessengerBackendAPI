@@ -76,7 +76,6 @@
     <Compile Include="Model\ChatTextMessage.cs" />
     <Compile Include="Model\CloneMessengerDbContext.cs" />
     <Compile Include="Model\UserLastReadMessage.cs" />
-    <Compile Include="Model\UserReadMessageInfor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

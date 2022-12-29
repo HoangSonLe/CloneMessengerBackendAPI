@@ -120,14 +120,14 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 if (dbData == null)
                 {
                     //thêm mới
-                    var newData = new UserLastReadMessage()
+                    var userLastRead = new UserLastReadMessage()
                     {
                         ChatGroupId = chatGroupId,
                         LastReadMessageId = lastMessage.Id,
                         Time = DateTime.Now,
                         UserId = currentUserId
                     };
-                    context.UserLastReadMessages.Add(newData);
+                    context.UserLastReadMessages.Add(userLastRead);
                 }
                 else
                 {
