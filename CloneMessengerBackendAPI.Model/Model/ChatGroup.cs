@@ -47,5 +47,9 @@ namespace CloneMessengerBackendAPI.Model.Model
 
         public virtual ChatMessage LastChatMessage { get; set; }
 
+        public object MapDTOChatGroup(object g)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

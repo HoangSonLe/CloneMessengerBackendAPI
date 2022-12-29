@@ -6,12 +6,16 @@ using System.Threading.Tasks;
 
 namespace CloneMessengerBackendAPI.Service.Models
 {
-    public class ChatMessageFilterModel : LazyLoadPagination
+    public class PaginationModel : LazyLoadPagination
     {
-        public ChatMessageFilterModel()
+        public PaginationModel()
         {
             Skip = 0;
             PageSize = 20;
         }
+    }
+    public class ChatMessagePaginationModel : PaginationModel
+    {
+        public Guid ChatGroupId { get; set; }
     }
 }

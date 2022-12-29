@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CloneMessengerBackendAPI.Service.Mapping
+namespace CloneMessengerBackendAPI.Web.Mapping
 {
     public class AutoMapperConfiguration : Profile
     {

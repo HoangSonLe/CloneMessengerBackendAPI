@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CloneMessengerBackendAPI.Service.Models.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -15,6 +16,12 @@ namespace CloneMessengerBackendAPI.Service.Helper
             md5.ComputeHash(ASCIIEncoding.UTF8.GetBytes(text));
             byte[] result = md5.Hash;
             return result;
+        }
+
+        public static string CreateChatGroupName (List<UserViewModel> users)
+        {
+            var s = string.Join(",",users.Select(i=> i.DisplayName).ToList());
+            return s;
         }
     }
 }
