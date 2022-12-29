@@ -24,6 +24,8 @@ namespace CloneMessengerBackendAPI.Model.Model
 
         public DateTime AddedDate { get; set; }
 
+        public bool IsRemoved { get; set; }
+
         public virtual ChatGroup ChatGroup { get; set; }
         public virtual User User { get; set; }
         public virtual User AddedUser { get; set; }

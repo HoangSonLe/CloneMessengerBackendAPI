@@ -28,11 +28,6 @@ namespace CloneMessengerBackendAPI.Model.Model
 
         public Guid? LastMessageId { get; set; }
 
-        [Required]
-        public string UserIds { get; set; }
-
-        public int Status { get; set; }
-
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ChatMember> ChatMembers { get; set; }
@@ -46,10 +41,5 @@ namespace CloneMessengerBackendAPI.Model.Model
         public virtual User User { get; set; }
 
         public virtual ChatMessage LastChatMessage { get; set; }
-
-        public object MapDTOChatGroup(object g)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

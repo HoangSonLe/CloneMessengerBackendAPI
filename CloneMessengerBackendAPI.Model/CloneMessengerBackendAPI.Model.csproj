@@ -63,6 +63,10 @@
     <Compile Include="Migrations\202212271008199_InitCreate.designer.cs">
       <DependentUpon>202212271008199_InitCreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202212291722578_AddStatusReadMessage.cs" />
+    <Compile Include="Migrations\202212291722578_AddStatusReadMessage.designer.cs">
+      <DependentUpon>202212291722578_AddStatusReadMessage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\ChatFileAttachment.cs" />
     <Compile Include="Model\User.cs" />
@@ -72,6 +76,7 @@
     <Compile Include="Model\ChatTextMessage.cs" />
     <Compile Include="Model\CloneMessengerDbContext.cs" />
     <Compile Include="Model\UserLastReadMessage.cs" />
+    <Compile Include="Model\UserReadMessageInfor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -81,6 +86,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202212271008199_InitCreate.resx">
       <DependentUpon>202212271008199_InitCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202212291722578_AddStatusReadMessage.resx">
+      <DependentUpon>202212291722578_AddStatusReadMessage.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
