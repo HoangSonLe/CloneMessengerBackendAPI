@@ -18,8 +18,6 @@ namespace CloneMessengerBackendAPI.Service.Helper
             vm.CreatedBy = g.CreatedBy;
             vm.CreatedDate = g.CreatedDate;
             vm.LastMessageId = g.LastMessageId;
-            vm.UserIds = g.UserIds;
-            vm.Status = g.Status;
         }
         public static void MapDTOChatMessage(this ChatMessageViewModel vm, ChatMessage m)
         {

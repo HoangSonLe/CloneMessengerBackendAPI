@@ -343,7 +343,6 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 Name = StringHelper.CreateChatGroupName(post.Users),
                 CreatedDate = DateTime.Now,
                 LastChatMessage = message,
-                Status = (int)EChatGroupStatus.InGroup,
                 UserLastReadMessages = new List<UserLastReadMessage>() {
                     new UserLastReadMessage()
                     {
@@ -413,8 +412,6 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 Name = "Test",
                 CreatedBy = users[0].Id,
                 CreatedDate = DateTime.Now,
-                UserIds = users[0].Id.ToString(),
-                Status = (int)EChatGroupStatus.InGroup,
             };
             var chatMembers = new List<ChatMember>()
             {
