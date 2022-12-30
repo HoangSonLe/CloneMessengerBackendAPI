@@ -16,7 +16,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
 {
     public interface IMessageServices
     {
-        Task<Acknowledgement<List<ChatGroupViewModel>>> GetChatGroups(PaginationModel post);
+        Task<Acknowledgement<PaginationModel<List<ChatGroupViewModel>>>> GetChatGroups(PaginationModel post);
         Task<Acknowledgement<ChatGroupDetailViewModel>> GetChatGroupDetail(ChatMessagePaginationModel post);
         Task<Acknowledgement> SendMessage(ChatMessagePostData post);
         Task<Acknowledgement<List<ChatMessageViewModel>>> GetMessageList(ChatMessagePaginationModel post);
@@ -41,7 +41,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         /// </summary>
         /// <param name="post"></param>
         /// <returns></returns>
-        public async Task<Acknowledgement<List<ChatGroupViewModel>>> GetChatGroups(PaginationModel post)
+        public async Task<Acknowledgement<PaginationModel<List<ChatGroupViewModel>>>> GetChatGroups(PaginationModel post)
         {
             var currentUserId = CurrentUserId();
             var context = DbContext;
@@ -71,7 +71,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                                join u in context.Users on cm.UserId equals u.Id
                                select u).ToListAsync();
 
-            var result = new List<ChatGroupViewModel>();
+            var listChatGroup = new List<ChatGroupViewModel>();
             foreach (var g in groupData)
             {
                 var gr = g.ChatGroup;
@@ -92,13 +92,20 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     };
                     group.LastMessage.MapDTOChatMessage(lm);
                 }
-                result.Add(group);
+                listChatGroup.Add(group);
             }
-            return new Acknowledgement<List<ChatGroupViewModel>>()
+            var nextSkip = post.Skip + listChatGroup.Count();
+            var ack = new Acknowledgement<PaginationModel<List<ChatGroupViewModel>>>()
             {
                 IsSuccess = true,
-                Data = result
+                Data = new PaginationModel<List<ChatGroupViewModel>>()
+                {
+                    HasMore = ((await queryGroup.CountAsync()) > nextSkip),
+                    Data = listChatGroup,
+                    Skip = nextSkip
+                },
             };
+            return ack;
         }
         /// <summary>
         /// Update last read message of user

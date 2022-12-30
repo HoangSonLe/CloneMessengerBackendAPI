@@ -11,9 +11,11 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace CloneMessengerBackendAPI.Web.API
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ChatController : BaseAPIController
     {
         public ChatController(IMessageServices messageServices) : base(messageServices)
@@ -21,9 +23,9 @@ namespace CloneMessengerBackendAPI.Web.API
         }
 
 
-        [HttpGet]
+        [HttpPost]
         // GET: ChatGroup
-        public async Task<Acknowledgement<List<ChatGroupViewModel>>> GetChatGroupList(PaginationModel post)
+        public async Task<Acknowledgement<PaginationModel<List<ChatGroupViewModel>>>> GetChatGroupList(PaginationModel post)
         {
             var p = post == null ?new PaginationModel() : post;
             var result = await MessageServices.GetChatGroups(p);

@@ -14,6 +14,10 @@ namespace CloneMessengerBackendAPI.Service.Models
             PageSize = 20;
         }
     }
+    public class PaginationModel<T> : PaginationModel
+    {
+        public T Data { get; set; }
+    }
     public class ChatMessagePaginationModel : PaginationModel
     {
         public Guid ChatGroupId { get; set; }

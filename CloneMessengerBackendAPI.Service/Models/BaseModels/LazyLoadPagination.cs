@@ -10,6 +10,6 @@ namespace CloneMessengerBackendAPI.Service.Models
 	{
 		public int Skip { get; set; }
 		public int? PageSize { get; set; }
-		public bool CanLoadMore { get; set; }
-	}
+        public bool HasMore { get; set; }
+    }
 }
