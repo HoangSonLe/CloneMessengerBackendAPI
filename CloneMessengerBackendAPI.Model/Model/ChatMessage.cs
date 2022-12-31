@@ -25,6 +25,8 @@ namespace CloneMessengerBackendAPI.Model.Model
         public DateTime CreatedDate { get; set; }
 
         public bool IsSystem { get; set; }
+        public Guid ContinuityKeyByUser { get; set; }
+        public Guid ContinuityKeyByTime { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ChatFileAttachment> ChatFileAttachments { get; set; }

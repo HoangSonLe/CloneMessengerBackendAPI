@@ -22,7 +22,15 @@ namespace CloneMessengerBackendAPI.Web.API
         {
         }
 
-
+        [HttpGet]
+        public async Task<Acknowledgement<PageDefaultModel>> GetPageDefaultModel()
+        {
+            return new Acknowledgement<PageDefaultModel>()
+            {
+                IsSuccess = true,
+                Data = new PageDefaultModel()
+            };
+        }
         [HttpPost]
         // GET: ChatGroup
         public async Task<Acknowledgement<PaginationModel<List<ChatGroupViewModel>>>> GetChatGroupList(PaginationModel post)
@@ -38,7 +46,7 @@ namespace CloneMessengerBackendAPI.Web.API
             return result;
         } 
         [HttpPost]
-        public async Task<Acknowledgement<List<ChatMessageViewModel>>> GetMessageList(ChatMessagePaginationModel post)
+        public async Task<Acknowledgement<List<ChatMessageGroupByTimeViewModel>>> GetMessageList(ChatMessagePaginationModel post)
         {
             var result = await MessageServices.GetMessageList(post);
             return result;

@@ -19,7 +19,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         Task<Acknowledgement<PaginationModel<List<ChatGroupViewModel>>>> GetChatGroups(PaginationModel post);
         Task<Acknowledgement<ChatGroupDetailViewModel>> GetChatGroupDetail(ChatMessagePaginationModel post);
         Task<Acknowledgement> SendMessage(ChatMessagePostData post);
-        Task<Acknowledgement<List<ChatMessageViewModel>>> GetMessageList(ChatMessagePaginationModel post);
+        Task<Acknowledgement<List<ChatMessageGroupByTimeViewModel>>> GetMessageList(ChatMessagePaginationModel post);
         Task<Acknowledgement<List<UserViewModel>>> GetUserList(string searchValue);
         Task<Acknowledgement> CreateChatGroup(CreateChatGroupModel post);
 
@@ -167,21 +167,39 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         /// </summary>
         /// <param name="post"></param>
         /// <returns></returns>
-        public async Task<Acknowledgement<List<ChatMessageViewModel>>> GetMessageList(ChatMessagePaginationModel post)
+        public async Task<Acknowledgement<List<ChatMessageGroupByTimeViewModel>>> GetMessageList(ChatMessagePaginationModel post)
         {
             var context = DbContext;
-            var ack = new Acknowledgement<List<ChatMessageViewModel>>();
+            var ack = new Acknowledgement<List<ChatMessageGroupByTimeViewModel>>();
             var messageQuery = context.ChatMessages.Where(i => i.GroupId == post.ChatGroupId)
                                                .Include(i => i.ChatTextMessage)
-                                               .Include(i => i.User).OrderByDescending(i => i.CreatedDate).AsQueryable();
+                                               .Include(i => i.User).OrderBy(i => i.CreatedDate).AsQueryable();
             if (post.PageSize.HasValue)
             {
                 messageQuery = messageQuery.Skip(post.Skip).Take(post.PageSize.Value);
             }
             var messages = await messageQuery.ToArrayAsync();
-
-            var result = messages.Select(i => MapChatMessageViewModel(i, i.User)).OrderBy(i => i.CreatedDate).ToList();
-            ack.Data = result;
+            //Neu group thay doi thu tu list thi bo order o query
+            var groupByTime = messages.GroupBy(i=> i.ContinuityKeyByTime).ToList();
+            var result = new List<ChatMessageGroupByTimeViewModel>();
+            groupByTime.ForEach(i =>
+            {
+                var groupUser = i.GroupBy(j => j.ContinuityKeyByUser).ToList();
+                var groupTime = new ChatMessageGroupByTimeViewModel()
+                {
+                    ContinuityKeyByTime = i.Key,
+                    GroupMessageTime = i.OrderBy(j => j.CreatedBy).First().CreatedDate,
+                    GroupMessageListByUser = groupUser.Select(k => new ChatMessageGroupByUserViewModel()
+                    {
+                        ContinuityKeyByUser = k.Key,
+                        IsMyMessage = k.First().CreatedBy == CurrentUserId(),
+                        Messages = k.Select(j => MapChatMessageViewModel(j, j.User)).ToList()
+                    }).OrderBy(j => j.Messages.First().CreatedDate).ToList()
+                };
+                result.Add(groupTime);
+            });
+            //var result = messages.Select(i => MapChatMessageViewModel(i, i.User)).OrderBy(i => i.CreatedDate).ToList();
+            ack.Data = result.OrderBy(i => i.GroupMessageTime).ToList();
             ack.IsSuccess = true;
             return ack;
 
@@ -224,7 +242,8 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 Id = queryG.Id,
                 Name = queryG.Name,
                 ListMembers = queryG.ChatMembers.Select(i => MapChatMemberViewModel(i.User, i.AddedUser)).ToList(),
-                MessageList = messagesAck.Data,
+                GroupMessageListByTime = messagesAck.Data,
+                IsRemoved = queryG.ChatMembers.Any(i=> i.UserId == CurrentUserId() && i.IsRemoved == true),
                 DefaultChatMessage = new ChatMessagePostData()
                 {
                     GroupId = queryG.Id,
@@ -232,6 +251,10 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     CurrentUserId = CurrentUserId()
                 }
             };
+            if (result.IsGroup)
+            {
+                result.Name = queryG.ChatMembers.First(i => i.UserId != CurrentUserId()).User.DisplayName;
+            }
 
             ack.Data = result;
             ack.IsSuccess = true;
@@ -373,6 +396,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         }
         #endregion
         #region Others
+
         public ChatMessageViewModel MapChatMessageViewModel(ChatMessage m, User u)
         {
             var cm = new ChatMessageViewModel();

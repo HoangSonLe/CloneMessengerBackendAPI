@@ -74,7 +74,8 @@
     <Compile Include="Helper\StringHelper.cs" />
     <Compile Include="Models\BaseModels\Acknowledgement.cs" />
     <Compile Include="Models\Enum.cs" />
-    <Compile Include="Models\ViewModels\ChatGroupFilterModel.cs" />
+    <Compile Include="Models\ViewModels\PageDefaultModel.cs" />
+    <Compile Include="Models\ViewModels\PaginationModel.cs" />
     <Compile Include="Models\ViewModels\ChatGroupViewModel.cs" />
     <Compile Include="Models\ViewModels\ChatGroupDetailViewModel.cs" />
     <Compile Include="Models\ViewModels\ChatMemberViewModel.cs" />

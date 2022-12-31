@@ -12,12 +12,25 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
         public Guid CurrentUserId { get; set; }
         public string Text { get; set; }
     }
-    //public class ChatMessageGroupViewModel
-    //{
-    //    public DateTime GroupMessageTime { get; set;}
-    //    public List<ChatMessageViewModel> Messages { get; set; }
+    /// <summary>
+    /// Group by time with a setting preiod time
+    /// </summary>
+    public class ChatMessageGroupByTimeViewModel
+    {
+        public Guid ContinuityKeyByTime { get; set; }
+        public DateTime GroupMessageTime { get; set; }
+        public List<ChatMessageGroupByUserViewModel> GroupMessageListByUser { get; set; }
+    }
+    /// <summary>
+    /// Group messages by user
+    /// </summary>
+    public class ChatMessageGroupByUserViewModel
+    {
+        public Guid ContinuityKeyByUser { get; set; }
+        public bool IsMyMessage { get; set; }
+        public List<ChatMessageViewModel> Messages { get; set; }
 
-    //}
+    }
     public class ChatMessageViewModel
     {
         public Guid Id { get; set; }
