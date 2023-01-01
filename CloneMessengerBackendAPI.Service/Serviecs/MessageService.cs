@@ -11,6 +11,8 @@ using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 using LinqKit;
+using System.Runtime.Caching;
+using CloneMessengerBackendAPI.Model.ConfigureModel;
 
 namespace CloneMessengerBackendAPI.Service.Serviecs
 {
@@ -19,7 +21,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         Task<Acknowledgement<PaginationModel<List<ChatGroupViewModel>>>> GetChatGroups(PaginationModel post);
         Task<Acknowledgement<ChatGroupDetailViewModel>> GetChatGroupDetail(ChatMessagePaginationModel post);
         Task<Acknowledgement> SendMessage(ChatMessagePostData post);
-        Task<Acknowledgement<List<ChatMessageGroupByTimeViewModel>>> GetMessageList(ChatMessagePaginationModel post);
+        Task<Acknowledgement<PaginationModel<List<ChatMessageGroupByTimeViewModel>>>> GetMessageList(ChatMessagePaginationModel post);
         Task<Acknowledgement<List<UserViewModel>>> GetUserList(string searchValue);
         Task<Acknowledgement> CreateChatGroup(CreateChatGroupModel post);
 
@@ -27,6 +29,14 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
     }
     public class MessageService : BaseService, IMessageServices
     {
+        private string ContinuityKeyByTime
+        {
+            get { return "ContinuityKeyByTime"; }
+        }
+        private string ContinuityKeyByUser
+        {
+            get { return "ContinuityKeyByUser"; }
+        }
         public Guid CurrentUserId()
         {
             return Guid.Parse("29CA1C9B-04AF-45CE-A5D9-DC7849A35EBC");
@@ -167,18 +177,18 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         /// </summary>
         /// <param name="post"></param>
         /// <returns></returns>
-        public async Task<Acknowledgement<List<ChatMessageGroupByTimeViewModel>>> GetMessageList(ChatMessagePaginationModel post)
+        public async Task<Acknowledgement<PaginationModel<List<ChatMessageGroupByTimeViewModel>>>> GetMessageList(ChatMessagePaginationModel post)
         {
             var context = DbContext;
-            var ack = new Acknowledgement<List<ChatMessageGroupByTimeViewModel>>();
+            var ack = new Acknowledgement<PaginationModel<List<ChatMessageGroupByTimeViewModel>>>();
             var messageQuery = context.ChatMessages.Where(i => i.GroupId == post.ChatGroupId)
                                                .Include(i => i.ChatTextMessage)
-                                               .Include(i => i.User).OrderBy(i => i.CreatedDate).AsQueryable();
+                                               .Include(i => i.User).OrderByDescending(i => i.CreatedDate).AsQueryable();
             if (post.PageSize.HasValue)
             {
                 messageQuery = messageQuery.Skip(post.Skip).Take(post.PageSize.Value);
             }
-            var messages = await messageQuery.ToArrayAsync();
+            var messages = await messageQuery.ToListAsync();
             //Neu group thay doi thu tu list thi bo order o query
             var groupByTime = messages.GroupBy(i=> i.ContinuityKeyByTime).ToList();
             var result = new List<ChatMessageGroupByTimeViewModel>();
@@ -199,7 +209,13 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 result.Add(groupTime);
             });
             //var result = messages.Select(i => MapChatMessageViewModel(i, i.User)).OrderBy(i => i.CreatedDate).ToList();
-            ack.Data = result.OrderBy(i => i.GroupMessageTime).ToList();
+            var nextSkip = post.Skip + messages.Count();
+            ack.Data = new PaginationModel<List<ChatMessageGroupByTimeViewModel>>()
+            {
+                Data = result.OrderBy(i => i.GroupMessageTime).ToList(),
+                HasMore = ((await messageQuery.CountAsync()) > nextSkip),
+                Skip = nextSkip,
+            };
             ack.IsSuccess = true;
             return ack;
 
@@ -248,7 +264,6 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 {
                     GroupId = queryG.Id,
                     Text = string.Empty,
-                    CurrentUserId = CurrentUserId()
                 }
             };
             if (result.IsGroup)
@@ -267,6 +282,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         /// <returns></returns>
         public async Task<Acknowledgement> SendMessage(ChatMessagePostData post)
         {
+            var cacheGroup = GetCacheGroupMessage();
             var ack = new Acknowledgement();
             var context = DbContext;
             var gr = await context.ChatGroups.Where(i => i.Id == post.GroupId)
@@ -277,23 +293,25 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 ack.IsSuccess = false;
                 ack.ErrorMessage = new List<string>() { "Chat group is not found" };
             }
-
+            var currentUserId = CurrentUserId();
             var cm = new ChatMessage()
             {
                 Id = Guid.NewGuid(),
                 IsSystem = false,
                 GroupId = post.GroupId,
+                ContinuityKeyByTime = cacheGroup.KeyGroupByTime,
+                ContinuityKeyByUser = cacheGroup.KeyGroupByUserId,
                 ChatTextMessage = post.Text != string.Empty ?
                 new ChatTextMessage()
                 {
                     Text = post.Text
                 } : null,
-                CreatedBy = post.CurrentUserId,
+                CreatedBy = currentUserId,
                 CreatedDate = DateTime.Now,
             };
             gr.LastMessageId = cm.Id;
             gr.LastChatMessage = cm;
-            var ulrm = gr.UserLastReadMessages.Where(i => i.UserId == post.CurrentUserId).FirstOrDefault();
+            var ulrm = gr.UserLastReadMessages.Where(i => i.UserId == currentUserId).FirstOrDefault();
             if (ulrm != null)
             {
                 ulrm.Time = DateTime.Now;
@@ -303,7 +321,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 gr.UserLastReadMessages.Add(new UserLastReadMessage()
                 {
                     ChatGroupId = post.GroupId,
-                    UserId = post.CurrentUserId,
+                    UserId = currentUserId,
                     Time = DateTime.Now
                 });
             }
@@ -396,7 +414,58 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         }
         #endregion
         #region Others
+        public CacheGroup GetCacheGroupMessage()
+        {
+            //Thời gian gửi tin nhắn trừ CachePreviousSendMessage (thời gian bắt đầu tính group message)
+            //Nếu kq <= setting time cho 1 group message by time => keyGroupByTime xài cái key trong key
+            //Nếu kq > setting time => keyGroupByTime + CachePreviousSendMessage set bằng value mới và xài key, time đó
 
+            //Nếu get CacheByUser đúng trong thời gian tính group thì 
+            // 1. CreateUserId same với cái latest CreatedUserId in cache thì lấy cacheKeyUser thì xài cái key đó
+            // 2. CreateUserId not same với cái latest CreatedUserId in cache thì tạo value mới cacheKeyUser + xài cái key đó
+
+            // Time : StartingGroupTime + KeyGroupByTime in Cache, SettingTime tính cho group
+            // User : PreviousSendMessageUserId + KeyGroupByUser
+            var keyGroupMessageCache = SettingKey.CacheGroupMessageKey;
+
+            MemoryCache cache = MemoryCache.Default;
+            var dateTime = DateTime.Now;
+            var c = new CacheGroup()
+            {
+                StartingTime = dateTime,
+                KeyGroupByTime = Guid.NewGuid(),
+                KeyGroupByUserId = Guid.NewGuid(),
+                PreviousSendMessageUserId = CurrentUserId(),
+            };
+            CacheItem newCache = new CacheItem(keyGroupMessageCache, c);
+
+            //Nếu ko có keyCache => Tạo mới
+            if (cache.Contains(keyGroupMessageCache) == false)
+            {
+                cache.Set(newCache, null);
+            }
+            else
+            {
+                //Nếu có keyCache
+                var currentCache = (CacheGroup)cache.GetCacheItem(keyGroupMessageCache).Value;
+                var subTime = dateTime.Subtract(currentCache.StartingTime);
+                var settingTime = new TimeSpan(0,0,DefaultConfig.DefaultHourTMessageInGroupMessage);
+                if (subTime <= settingTime)
+                {
+                    if (currentCache.PreviousSendMessageUserId != CurrentUserId())
+                    {
+                        c.PreviousSendMessageUserId = CurrentUserId();
+                        c.KeyGroupByUserId = Guid.NewGuid();
+                    }
+                }
+                else
+                {
+                    cache.Set(newCache, null);
+                }
+            }
+            var myCache = (CacheGroup)cache.GetCacheItem(keyGroupMessageCache).Value;
+            return myCache;
+        }
         public ChatMessageViewModel MapChatMessageViewModel(ChatMessage m, User u)
         {
             var cm = new ChatMessageViewModel();

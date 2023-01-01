@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CloneMessengerBackendAPI.Model.ConfigureModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,7 @@ namespace CloneMessengerBackendAPI.Service.Models
         public PaginationModel()
         {
             Skip = 0;
-            PageSize = 20;
+            PageSize = DefaultConfig.DefaultPageSize;
         }
     }
     public class PaginationModel<T> : PaginationModel

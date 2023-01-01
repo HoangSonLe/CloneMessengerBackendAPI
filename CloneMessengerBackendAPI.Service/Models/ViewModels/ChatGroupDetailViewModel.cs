@@ -16,7 +16,7 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
         public bool IsGroup { get; }
         public bool IsRemoved { get; set; }
         //public List<ChatMessageViewModel> MessageList { get; set; }
-        public List<ChatMessageGroupByTimeViewModel> GroupMessageListByTime { get; set; }
+        public PaginationModel<List<ChatMessageGroupByTimeViewModel>> GroupMessageListByTime { get; set; }
         public List<ChatMemberViewModel> ListMembers { get; set; }
         public ChatMessagePostData DefaultChatMessage { get; set; }
         public ChatGroupDetailViewModel()

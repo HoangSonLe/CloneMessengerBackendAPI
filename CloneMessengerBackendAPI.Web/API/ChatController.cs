@@ -46,7 +46,7 @@ namespace CloneMessengerBackendAPI.Web.API
             return result;
         } 
         [HttpPost]
-        public async Task<Acknowledgement<List<ChatMessageGroupByTimeViewModel>>> GetMessageList(ChatMessagePaginationModel post)
+        public async Task<Acknowledgement<PaginationModel<List<ChatMessageGroupByTimeViewModel>>>> GetMessageList(ChatMessagePaginationModel post)
         {
             var result = await MessageServices.GetMessageList(post);
             return result;

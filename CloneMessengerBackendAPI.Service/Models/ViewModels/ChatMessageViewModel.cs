@@ -9,7 +9,6 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
     public class ChatMessagePostData
     {
         public Guid GroupId { get; set; }
-        public Guid CurrentUserId { get; set; }
         public string Text { get; set; }
     }
     /// <summary>
