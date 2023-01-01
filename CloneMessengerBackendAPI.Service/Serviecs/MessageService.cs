@@ -449,7 +449,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 //Nếu có keyCache
                 var currentCache = (CacheGroup)cache.GetCacheItem(keyGroupMessageCache).Value;
                 var subTime = dateTime.Subtract(currentCache.StartingTime);
-                var settingTime = new TimeSpan(0,0,DefaultConfig.DefaultHourTMessageInGroupMessage);
+                var settingTime = new TimeSpan(DefaultConfig.DefaultHourTMessageInGroupMessage,0,0);
                 if (subTime <= settingTime)
                 {
                     if (currentCache.PreviousSendMessageUserId != CurrentUserId())
