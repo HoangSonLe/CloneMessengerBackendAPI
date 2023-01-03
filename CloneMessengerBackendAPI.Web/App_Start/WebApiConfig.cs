@@ -17,14 +17,14 @@ namespace CloneMessengerBackendAPI.Web
             config.Formatters.Remove(config.Formatters.XmlFormatter);
 
             // setup camel-case for property names
-            var settings = GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings;
+            var jsonFormat = GlobalConfiguration.Configuration.Formatters.JsonFormatter;
+            var settings = jsonFormat.SerializerSettings;
             settings.Formatting = Newtonsoft.Json.Formatting.Indented;
             settings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
             settings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
             settings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
             settings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Error;
             settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-
 
             // Web API routes
             config.MapHttpAttributeRoutes();

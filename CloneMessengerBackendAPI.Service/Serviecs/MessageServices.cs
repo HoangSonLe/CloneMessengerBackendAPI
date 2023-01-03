@@ -13,38 +13,12 @@ using System.Threading.Tasks;
 using LinqKit;
 using System.Runtime.Caching;
 using CloneMessengerBackendAPI.Model.ConfigureModel;
+using CloneMessengerBackendAPI.Service.Interfaces;
 
 namespace CloneMessengerBackendAPI.Service.Serviecs
 {
-    public interface IMessageServices
+    public class MessageServices : BaseService, IMessageService
     {
-        Task<Acknowledgement<PaginationModel<List<ChatGroupViewModel>>>> GetChatGroups(PaginationModel post);
-        Task<Acknowledgement<ChatGroupDetailViewModel>> GetChatGroupDetail(ChatMessagePaginationModel post);
-        Task<Acknowledgement> SendMessage(ChatMessagePostData post);
-        Task<Acknowledgement<PaginationModel<List<ChatMessageGroupByTimeViewModel>>>> GetMessageList(ChatMessagePaginationModel post);
-        Task<Acknowledgement<List<UserViewModel>>> GetUserList(string searchValue);
-        Task<Acknowledgement> CreateChatGroup(CreateChatGroupModel post);
-
-
-    }
-    public class MessageService : BaseService, IMessageServices
-    {
-        private string ContinuityKeyByTime
-        {
-            get { return "ContinuityKeyByTime"; }
-        }
-        private string ContinuityKeyByUser
-        {
-            get { return "ContinuityKeyByUser"; }
-        }
-        public Guid CurrentUserId()
-        {
-            return Guid.Parse("29CA1C9B-04AF-45CE-A5D9-DC7849A35EBC");
-        }
-        public bool GetCurrentStatusOnlineByUserId(Guid userId)
-        {
-            return true;
-        }
         #region API
         /// <summary>
         /// Get list of chat group
@@ -184,6 +158,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             var messageQuery = context.ChatMessages.Where(i => i.GroupId == post.ChatGroupId)
                                                .Include(i => i.ChatTextMessage)
                                                .Include(i => i.User).OrderByDescending(i => i.CreatedDate).AsQueryable();
+            var totalMessages = messageQuery.Count();
             if (post.PageSize.HasValue)
             {
                 messageQuery = messageQuery.Skip(post.Skip).Take(post.PageSize.Value);
@@ -213,7 +188,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             ack.Data = new PaginationModel<List<ChatMessageGroupByTimeViewModel>>()
             {
                 Data = result.OrderBy(i => i.GroupMessageTime).ToList(),
-                HasMore = ((await messageQuery.CountAsync()) > nextSkip),
+                HasMore = totalMessages > nextSkip,
                 Skip = nextSkip,
             };
             ack.IsSuccess = true;
@@ -292,6 +267,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             {
                 ack.IsSuccess = false;
                 ack.ErrorMessage = new List<string>() { "Chat group is not found" };
+                return ack;
             }
             var currentUserId = CurrentUserId();
             var cm = new ChatMessage()

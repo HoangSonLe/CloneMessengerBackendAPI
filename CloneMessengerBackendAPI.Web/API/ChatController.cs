@@ -1,4 +1,5 @@
 ﻿using CloneMessengerBackendAPI.Model.Model;
+using CloneMessengerBackendAPI.Service.Interfaces;
 using CloneMessengerBackendAPI.Service.Models;
 using CloneMessengerBackendAPI.Service.Models.BaseModels;
 using CloneMessengerBackendAPI.Service.Models.ViewModels;
@@ -16,58 +17,60 @@ using System.Web.Http.Cors;
 namespace CloneMessengerBackendAPI.Web.API
 {
     [EnableCors(origins: "*", headers: "*", methods: "*")]
+    [Authorize]
     public class ChatController : BaseAPIController
     {
-        public ChatController(IMessageServices messageServices) : base(messageServices)
+        public ChatController(IServiceLocator serviceLocator) : base(serviceLocator)
         {
         }
 
         [HttpGet]
-        public async Task<Acknowledgement<PageDefaultModel>> GetPageDefaultModel()
+        public async Task<IHttpActionResult> GetPageDefaultModel()
         {
-            return new Acknowledgement<PageDefaultModel>()
+            var result = new Acknowledgement<PageDefaultModel>()
             {
                 IsSuccess = true,
                 Data = new PageDefaultModel()
             };
+            return MapToIHttpActionResult(result);
         }
         [HttpPost]
         // GET: ChatGroup
-        public async Task<Acknowledgement<PaginationModel<List<ChatGroupViewModel>>>> GetChatGroupList(PaginationModel post)
+        public async Task<IHttpActionResult> GetChatGroupList(PaginationModel post)
         {
             var p = post == null ?new PaginationModel() : post;
             var result = await MessageServices.GetChatGroups(p);
-            return result;
+            return MapToIHttpActionResult(result);
         }
         [HttpPost]
-        public async Task<Acknowledgement<ChatGroupDetailViewModel>> GetChatGroupDetail(ChatMessagePaginationModel post)
+        public async Task<IHttpActionResult> GetChatGroupDetail(ChatMessagePaginationModel post)
         {
             var result = await MessageServices.GetChatGroupDetail(post);
-            return result;
+            return MapToIHttpActionResult(result)   ;
         } 
         [HttpPost]
-        public async Task<Acknowledgement<PaginationModel<List<ChatMessageGroupByTimeViewModel>>>> GetMessageList(ChatMessagePaginationModel post)
+        public async Task<IHttpActionResult> GetMessageList(ChatMessagePaginationModel post)
         {
             var result = await MessageServices.GetMessageList(post);
-            return result;
+            return MapToIHttpActionResult(result);
         }
         [HttpPost]
-        public async Task<Acknowledgement> SendMessage(ChatMessagePostData post)
+        public async Task<IHttpActionResult> SendMessage(ChatMessagePostData post)
         {
             var result = await MessageServices.SendMessage(post);
-            return result;
+            return MapToIHttpActionResult(result);
         } 
         [HttpPost]
-        public async Task<Acknowledgement<List<UserViewModel>>> GetUserList(string searchValue)
+        public async Task<IHttpActionResult> GetUserList(string searchValue)
         {
             var result = await MessageServices.GetUserList(searchValue);
-            return result;
+            return MapToIHttpActionResult(result);
         }
         [HttpPost]
-        public async Task<Acknowledgement> CreateChatGroup(CreateChatGroupModel post)
+        public async Task<IHttpActionResult> CreateChatGroup(CreateChatGroupModel post)
         {
             var result = await MessageServices.CreateChatGroup(post);
-            return result;
+            return MapToIHttpActionResult(result);
         }
     }
 }

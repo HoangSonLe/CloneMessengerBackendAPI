@@ -13,6 +13,17 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         {
             get { return new CloneMessengerDbContext(); }
         }
+
+        public Guid CurrentUserId()
+        {
+            return Guid.Parse("29CA1C9B-04AF-45CE-A5D9-DC7849A35EBC");
+        }
+        public bool GetCurrentStatusOnlineByUserId(Guid userId)
+        {
+            return true;
+        }
+
+
         public void Dispose()
         {
             DbContext.Dispose();
