@@ -39,24 +39,28 @@ namespace CloneMessengerBackendAPI.Web.API
         public async Task<IHttpActionResult> GetChatGroupList(PaginationModel post)
         {
             var p = post == null ?new PaginationModel() : post;
+            p.CurrentUser = GetCurrentUserModel();
             var result = await MessageServices.GetChatGroups(p);
             return MapToIHttpActionResult(result);
         }
         [HttpPost]
         public async Task<IHttpActionResult> GetChatGroupDetail(ChatMessagePaginationModel post)
         {
+            post.CurrentUser = GetCurrentUserModel();
             var result = await MessageServices.GetChatGroupDetail(post);
             return MapToIHttpActionResult(result)   ;
         } 
         [HttpPost]
         public async Task<IHttpActionResult> GetMessageList(ChatMessagePaginationModel post)
         {
+            post.CurrentUser = GetCurrentUserModel();
             var result = await MessageServices.GetMessageList(post);
             return MapToIHttpActionResult(result);
         }
         [HttpPost]
         public async Task<IHttpActionResult> SendMessage(ChatMessagePostData post)
         {
+            post.CurrentUser = GetCurrentUserModel();
             var result = await MessageServices.SendMessage(post);
             return MapToIHttpActionResult(result);
         } 
@@ -69,6 +73,7 @@ namespace CloneMessengerBackendAPI.Web.API
         [HttpPost]
         public async Task<IHttpActionResult> CreateChatGroup(CreateChatGroupModel post)
         {
+            post.CurrentUser = GetCurrentUserModel();
             var result = await MessageServices.CreateChatGroup(post);
             return MapToIHttpActionResult(result);
         }

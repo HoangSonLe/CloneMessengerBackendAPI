@@ -38,13 +38,14 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
 
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.NameIdentifier,user.Username),
-                new Claim(JwtRegisteredClaimNames.Jti,user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
+                new Claim(ClaimTypes.Name,user.Username),
+                new Claim(ClaimTypes.GivenName,user.DisplayName),
+                new Claim(ClaimTypes.UserData,user.Password),
             };
             ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims);
             return GetJwt(claimsIdentity);
         }
-
         public static string GetJwt(ClaimsIdentity claimsIdentity)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Convert.ToString(ConfigurationManager.AppSettings["config:JwtKey"])));
@@ -66,7 +67,7 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
         public static ClaimsPrincipal ParseToken(string jwt)
         {
             JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            if (!(((SecurityTokenHandler)jwtSecurityTokenHandler).ReadToken(jwt) is JwtSecurityToken))
+            if (!((jwtSecurityTokenHandler).ReadToken(jwt) is JwtSecurityToken))
             {
                 return null;
             }

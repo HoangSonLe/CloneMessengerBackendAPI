@@ -1,10 +1,12 @@
 ﻿using CloneMessengerBackendAPI.Service.Interfaces;
 using CloneMessengerBackendAPI.Service.Models.BaseModels;
+using CloneMessengerBackendAPI.Service.Models.ViewModels;
 using CloneMessengerBackendAPI.Service.Serviecs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
@@ -41,6 +43,13 @@ namespace CloneMessengerBackendAPI.Web.API
                 return Content(HttpStatusCode.NotFound, ack.ErrorMessage);
             }
             return Ok(ack);
+        }
+        protected UserModel GetCurrentUserModel()
+        {
+            var current = HttpContext.Current.User;
+            var identity = (ClaimsPrincipal)current;
+            var result = (new UserModel()).ParseClaim(identity);
+            return result;
         }
         public IMessageService MessageServices => serviceLocator.MessageService;
         public IUserService UserServices => serviceLocator.UserService;

@@ -1,7 +1,12 @@
 ﻿using CloneMessengerBackendAPI.Model.Model;
+using CloneMessengerBackendAPI.Service.Models.BaseModels;
+using CloneMessengerBackendAPI.Service.Models.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
+using System.Security.Principal;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,20 +14,23 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
 {
     public abstract class BaseService : IDisposable
     {
+        private CloneMessengerDbContext _DbContext;
         public CloneMessengerDbContext DbContext
         {
-            get { return new CloneMessengerDbContext(); }
+            get
+            {
+                if(_DbContext == null)
+                {
+                    _DbContext = new CloneMessengerDbContext();
+                }
+                return _DbContext;
+            }
         }
 
-        public Guid CurrentUserId()
-        {
-            return Guid.Parse("29CA1C9B-04AF-45CE-A5D9-DC7849A35EBC");
-        }
         public bool GetCurrentStatusOnlineByUserId(Guid userId)
         {
             return true;
         }
-
 
         public void Dispose()
         {

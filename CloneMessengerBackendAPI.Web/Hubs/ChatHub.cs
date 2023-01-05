@@ -85,7 +85,7 @@ namespace CloneMessengerBackendAPI.Web.Hubs
                 if (string.IsNullOrEmpty(jwtKey) == false)
                 {
                     var currentClaim = Authentication.ParseToken(jwtKey);
-                    userId = currentClaim.Claims.Where(i=>i.Type == JwtRegisteredClaimNames.Jti).First().Value;
+                    userId = currentClaim.Claims.Where(i=>i.Type == ClaimTypes.NameIdentifier).First().Value;
                 }
             }
 

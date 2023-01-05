@@ -17,7 +17,6 @@ namespace CloneMessengerBackendAPI.Service.Interfaces
         Task<Acknowledgement<PaginationModel<List<ChatMessageGroupByTimeViewModel>>>> GetMessageList(ChatMessagePaginationModel post);
         Task<Acknowledgement<List<UserViewModel>>> GetUserList(string searchValue);
         Task<Acknowledgement> CreateChatGroup(CreateChatGroupModel post);
-
-
+        Task<Acknowledgement> ReadLastMessage(Guid chatGroupId, Guid currentUserId);
     }
 }

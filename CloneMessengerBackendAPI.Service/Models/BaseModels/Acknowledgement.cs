@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CloneMessengerBackendAPI.Service.Models.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
@@ -7,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace CloneMessengerBackendAPI.Service.Models.BaseModels
 {
+    public class BaseModelWithUserIdentity
+    {
+        public UserModel CurrentUser { get; set; }
+    }
     public class Acknowledgement
     {
         public bool IsSuccess { get; set; }

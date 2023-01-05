@@ -27,7 +27,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         /// <returns></returns>
         public async Task<Acknowledgement<PaginationModel<List<ChatGroupViewModel>>>> GetChatGroups(PaginationModel post)
         {
-            var currentUserId = CurrentUserId();
+            var currentUserId = post.CurrentUser.Id;
             var context = DbContext;
 
             var seftGroupIds = context.ChatMembers.Where(i => i.UserId == currentUserId).Select(i => i.ChatGroupId);
@@ -96,14 +96,13 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         /// </summary>
         /// <param name="chatGroupId"></param>
         /// <returns></returns>
-        public async Task<Acknowledgement> ReadLastMessage(Guid chatGroupId)
+        public async Task<Acknowledgement> ReadLastMessage(Guid chatGroupId,Guid currentUserId)
         {
             var ack = new Acknowledgement();
             var context = DbContext;
             var lastMessage = await (from g in context.ChatGroups.Where(i => i.Id == chatGroupId)
                                      join cm in context.ChatMessages on g.LastMessageId equals cm.Id
                                      select cm).FirstOrDefaultAsync();
-            var currentUserId = CurrentUserId();
             if (lastMessage != null)
             {
                 var isNeedSave = true;
@@ -177,7 +176,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     GroupMessageListByUser = groupUser.Select(k => new ChatMessageGroupByUserViewModel()
                     {
                         ContinuityKeyByUser = k.Key,
-                        IsMyMessage = k.First().CreatedBy == CurrentUserId(),
+                        IsMyMessage = k.First().CreatedBy == post.CurrentUser.Id,
                         Messages = k.Select(j => MapChatMessageViewModel(j, j.User)).ToList()
                     }).OrderBy(j => j.Messages.First().CreatedDate).ToList()
                 };
@@ -205,7 +204,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             var context = DbContext;
             var ack = new Acknowledgement<ChatGroupDetailViewModel>();
             //Read last message before load message detail
-            var readLastAck = await ReadLastMessage(post.ChatGroupId);
+            var readLastAck = await ReadLastMessage(post.ChatGroupId,post.CurrentUser.Id);
             if (readLastAck.IsSuccess == false)
             {
                 ack.IsSuccess = readLastAck.IsSuccess;
@@ -234,7 +233,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 Name = queryG.Name,
                 ListMembers = queryG.ChatMembers.Select(i => MapChatMemberViewModel(i.User, i.AddedUser)).ToList(),
                 GroupMessageListByTime = messagesAck.Data,
-                IsRemoved = queryG.ChatMembers.Any(i=> i.UserId == CurrentUserId() && i.IsRemoved == true),
+                IsRemoved = queryG.ChatMembers.Any(i=> i.UserId == post.CurrentUser.Id && i.IsRemoved == true),
                 DefaultChatMessage = new ChatMessagePostData()
                 {
                     GroupId = queryG.Id,
@@ -243,7 +242,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             };
             if (result.IsGroup)
             {
-                result.Name = queryG.ChatMembers.First(i => i.UserId != CurrentUserId()).User.DisplayName;
+                result.Name = queryG.ChatMembers.First(i => i.UserId != post.CurrentUser.Id).User.DisplayName;
             }
 
             ack.Data = result;
@@ -257,7 +256,9 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         /// <returns></returns>
         public async Task<Acknowledgement> SendMessage(ChatMessagePostData post)
         {
-            var cacheGroup = GetCacheGroupMessage();
+            //User post message => signalR message with status SENDING to user
+            //Service save message sucess => signalR message with status SENT to all user
+            var cacheGroup = CacheMessage.GetCacheGroupMessage(post.CurrentUser.Id);
             var ack = new Acknowledgement();
             var context = DbContext;
             var gr = await context.ChatGroups.Where(i => i.Id == post.GroupId)
@@ -269,7 +270,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 ack.ErrorMessage = new List<string>() { "Chat group is not found" };
                 return ack;
             }
-            var currentUserId = CurrentUserId();
+            var currentUserId = post.CurrentUser.Id;
             var cm = new ChatMessage()
             {
                 Id = Guid.NewGuid(),
@@ -350,7 +351,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         {
             var ack = new Acknowledgement();
             var context = DbContext;
-
+            var currentUserId = post.CurrentUser.Id;
             var message = new ChatMessage()
             {
                 Id = Guid.NewGuid(),
@@ -363,7 +364,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             var chatGroup = new ChatGroup()
             {
                 Id = Guid.NewGuid(),
-                CreatedBy = CurrentUserId(),
+                CreatedBy = currentUserId,
                 Name = StringHelper.CreateChatGroupName(post.Users),
                 CreatedDate = DateTime.Now,
                 LastChatMessage = message,
@@ -372,12 +373,12 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     {
                         LastReadMessageId = message.Id,
                         Time = DateTime.Now,
-                        UserId = CurrentUserId(),
+                        UserId = currentUserId,
                     }
                 },
                 ChatMembers = post.Users.Select(i => new ChatMember()
                 {
-                    AddedBy = CurrentUserId(),
+                    AddedBy = currentUserId,
                     AddedDate = DateTime.Now,
                     UserId = i.Id
                 }).ToList(),
@@ -390,58 +391,6 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         }
         #endregion
         #region Others
-        public CacheGroup GetCacheGroupMessage()
-        {
-            //Thời gian gửi tin nhắn trừ CachePreviousSendMessage (thời gian bắt đầu tính group message)
-            //Nếu kq <= setting time cho 1 group message by time => keyGroupByTime xài cái key trong key
-            //Nếu kq > setting time => keyGroupByTime + CachePreviousSendMessage set bằng value mới và xài key, time đó
-
-            //Nếu get CacheByUser đúng trong thời gian tính group thì 
-            // 1. CreateUserId same với cái latest CreatedUserId in cache thì lấy cacheKeyUser thì xài cái key đó
-            // 2. CreateUserId not same với cái latest CreatedUserId in cache thì tạo value mới cacheKeyUser + xài cái key đó
-
-            // Time : StartingGroupTime + KeyGroupByTime in Cache, SettingTime tính cho group
-            // User : PreviousSendMessageUserId + KeyGroupByUser
-            var keyGroupMessageCache = SettingKey.CacheGroupMessageKey;
-
-            MemoryCache cache = MemoryCache.Default;
-            var dateTime = DateTime.Now;
-            var c = new CacheGroup()
-            {
-                StartingTime = dateTime,
-                KeyGroupByTime = Guid.NewGuid(),
-                KeyGroupByUserId = Guid.NewGuid(),
-                PreviousSendMessageUserId = CurrentUserId(),
-            };
-            CacheItem newCache = new CacheItem(keyGroupMessageCache, c);
-
-            //Nếu ko có keyCache => Tạo mới
-            if (cache.Contains(keyGroupMessageCache) == false)
-            {
-                cache.Set(newCache, null);
-            }
-            else
-            {
-                //Nếu có keyCache
-                var currentCache = (CacheGroup)cache.GetCacheItem(keyGroupMessageCache).Value;
-                var subTime = dateTime.Subtract(currentCache.StartingTime);
-                var settingTime = new TimeSpan(DefaultConfig.DefaultHourTMessageInGroupMessage,0,0);
-                if (subTime <= settingTime)
-                {
-                    if (currentCache.PreviousSendMessageUserId != CurrentUserId())
-                    {
-                        c.PreviousSendMessageUserId = CurrentUserId();
-                        c.KeyGroupByUserId = Guid.NewGuid();
-                    }
-                }
-                else
-                {
-                    cache.Set(newCache, null);
-                }
-            }
-            var myCache = (CacheGroup)cache.GetCacheItem(keyGroupMessageCache).Value;
-            return myCache;
-        }
         public ChatMessageViewModel MapChatMessageViewModel(ChatMessage m, User u)
         {
             var cm = new ChatMessageViewModel();
@@ -545,3 +494,4 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
     }
 
 }
+ 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CloneMessengerBackendAPI.Service.Models.BaseModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CloneMessengerBackendAPI.Service.Models.ViewModels
 {
-    public class ChatMessagePostData
+    public class ChatMessagePostData : BaseModelWithUserIdentity
     {
         public Guid GroupId { get; set; }
         public string Text { get; set; }
