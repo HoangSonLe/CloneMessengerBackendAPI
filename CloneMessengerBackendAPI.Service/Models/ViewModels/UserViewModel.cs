@@ -10,6 +10,12 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
 {
     public class UserViewModel
     {
+        public UserViewModel() { }
+        public UserViewModel(UserModel u)
+        {
+            Id = u.Id;
+            DisplayName = u.DisplayName;
+        }
         public Guid Id { get; set; }
 
         public string DisplayName { get; set; }

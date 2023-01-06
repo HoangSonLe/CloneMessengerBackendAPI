@@ -13,6 +13,10 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
 {
     public class UserServices: BaseService,IUserService
     {
+        public UserServices(IChatHubService hub) : base(hub)
+        {
+        }
+
         public async Task<Acknowledgement<string>> Login(LoginModel post)
         {
             var context = DbContext;

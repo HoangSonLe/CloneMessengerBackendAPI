@@ -45,5 +45,10 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
 
         public string CreatedByName { get; set; }
         public string Text { get; set;}
+        public EMessageStatus MessageStatus { get; set; }
+        public ChatMessageViewModel()
+        {
+            MessageStatus = EMessageStatus.Sent;
+        }
     }
 }

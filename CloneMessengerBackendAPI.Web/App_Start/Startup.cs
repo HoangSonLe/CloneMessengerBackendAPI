@@ -3,6 +3,8 @@ using Autofac.Integration.Mvc;
 using Autofac.Integration.WebApi;
 using CloneMessengerBackendAPI.Model.Model;
 using CloneMessengerBackendAPI.Service.Interfaces;
+using CloneMessengerBackendAPI.Service.Serviecs;
+using CloneMessengerBackendAPI.Web.Hubs;
 using Microsoft.AspNet.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Owin;
@@ -14,7 +16,6 @@ using System;
 using System.Configuration;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Mvc;
 
@@ -28,9 +29,8 @@ namespace CloneMessengerBackendAPI.Web.App_Start
         {
             // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=316888
             ConfigAutofac(app);
-
             ConfigureOAuthTokenConsumption(app);
-
+           
             // Branch the pipeline here for requests that start with "/signalr"
             app.Map("/api/signalr", map =>
             {
@@ -49,6 +49,7 @@ namespace CloneMessengerBackendAPI.Web.App_Start
                 // Run the SignalR pipeline. We're not using MapSignalR
                 // since this branch already runs under the "/signalr"
                 // path.
+                hubConfiguration.EnableDetailedErrors = true;
                 map.RunSignalR(hubConfiguration);
             });
         }
@@ -82,17 +83,15 @@ namespace CloneMessengerBackendAPI.Web.App_Start
 
             builder.RegisterType<CloneMessengerDbContext>().AsSelf().InstancePerRequest();
 
-
+            builder.RegisterType<ChatHub>().As<IChatHubService>();
             // Services
-            builder.RegisterAssemblyTypes(typeof(IoCServiceLocator).Assembly)
-           .Where(t => t.Name.EndsWith("ServiceLocator"))
-           .AsImplementedInterfaces().InstancePerRequest();
-            //builder.RegisterAssemblyTypes(typeof(MessageServices).Assembly)
-            //   .Where(t => t.Name.EndsWith("MessageServices"))
-            //   .AsImplementedInterfaces().InstancePerRequest();
-            //builder.RegisterAssemblyTypes(typeof(UserServices).Assembly)
-            //  .Where(t => t.Name.EndsWith("UserServices"))
-            //  .AsImplementedInterfaces().InstancePerRequest();
+            builder.RegisterAssemblyTypes(typeof(UserServices).Assembly)
+             .Where(t => t.Name.EndsWith("UserServices"))
+             .AsImplementedInterfaces().InstancePerRequest();
+            builder.RegisterAssemblyTypes(typeof(MessageServices).Assembly)
+               .Where(t => t.Name.EndsWith("MessageServices"))
+               .AsImplementedInterfaces().InstancePerRequest();
+           
 
             Autofac.IContainer container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));

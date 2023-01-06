@@ -11,15 +11,4 @@ namespace CloneMessengerBackendAPI.Service.Interfaces
     {
 
     }
-    public interface IServiceLocator
-    {
-        IMessageService MessageService { get; }
-        IUserService UserService { get; }
-    }
-    public class IoCServiceLocator : IServiceLocator
-    {
-        public IMessageService MessageService => new MessageServices();
-
-        public IUserService UserService => new UserServices();
-    }
 }

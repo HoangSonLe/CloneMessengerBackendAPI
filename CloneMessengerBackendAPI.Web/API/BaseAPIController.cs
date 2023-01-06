@@ -2,6 +2,8 @@
 using CloneMessengerBackendAPI.Service.Models.BaseModels;
 using CloneMessengerBackendAPI.Service.Models.ViewModels;
 using CloneMessengerBackendAPI.Service.Serviecs;
+using CloneMessengerBackendAPI.Web.Hubs;
+using Microsoft.AspNet.SignalR.Hubs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +17,12 @@ namespace CloneMessengerBackendAPI.Web.API
 {
     public class BaseAPIController : ApiController
     {
-        private readonly IServiceLocator serviceLocator;
-        public BaseAPIController(IServiceLocator serviceLocator)
+        private readonly IMessageService messageService;
+        private readonly IUserService userService;
+        public BaseAPIController(IUserService userService, IMessageService messageService)
         {
-            this.serviceLocator = serviceLocator;
+            this.messageService = messageService;
+            this.userService = userService;
         }
         public IHttpActionResult MapToIHttpActionResult(Acknowledgement ack)
         {
@@ -44,6 +48,14 @@ namespace CloneMessengerBackendAPI.Web.API
             }
             return Ok(ack);
         }
+        protected IHubConnectionContext<IChatHub> ChatHubContext
+        {
+            get
+            {
+                var x = Microsoft.AspNet.SignalR.GlobalHost.ConnectionManager.GetHubContext<ChatHub, IChatHub>();
+                return x.Clients;
+            }
+        }
         protected UserModel GetCurrentUserModel()
         {
             var current = HttpContext.Current.User;
@@ -51,7 +63,7 @@ namespace CloneMessengerBackendAPI.Web.API
             var result = (new UserModel()).ParseClaim(identity);
             return result;
         }
-        public IMessageService MessageServices => serviceLocator.MessageService;
-        public IUserService UserServices => serviceLocator.UserService;
+        public IMessageService MessageServices => messageService;
+        public IUserService UserServices => userService;
     }
 }

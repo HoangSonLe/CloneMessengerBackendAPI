@@ -11,4 +11,11 @@ namespace CloneMessengerBackendAPI.Service.Models
         InGroup = 1,
         IsRemoved = 2,
     }
+    public enum EMessageStatus
+    {
+        Undefine = 0,
+        Sending = 1,
+        Sent = 2,
+        Read = 3
+    }
 }

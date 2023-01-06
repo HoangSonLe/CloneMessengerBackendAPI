@@ -55,6 +55,9 @@
     <Reference Include="LinqKit.EntityFramework, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b6c8cfc71f7a6a80, processorArchitecture=MSIL">
       <HintPath>..\packages\LinqKit.EntityFramework.1.2.3\lib\net45\LinqKit.EntityFramework.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.4.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.4.3\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IdentityModel.JsonWebTokens.5.3.0\lib\net461\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
     </Reference>
@@ -133,12 +136,14 @@
     <Compile Include="Helper\LinqHelper.cs" />
     <Compile Include="Helper\StringHelper.cs" />
     <Compile Include="Interfaces\IBasicService.cs" />
+    <Compile Include="Interfaces\IChatHubService.cs" />
     <Compile Include="Interfaces\IMessageService.cs" />
     <Compile Include="Interfaces\IUserService.cs" />
     <Compile Include="Models\BaseModels\Acknowledgement.cs" />
     <Compile Include="Models\BaseModels\Authentication.cs" />
     <Compile Include="Models\BaseModels\CacheGroupTime.cs" />
     <Compile Include="Models\Enum.cs" />
+    <Compile Include="Models\SignalRModels\MessageSignalRModel.cs" />
     <Compile Include="Models\ViewModels\PageDefaultModel.cs" />
     <Compile Include="Models\ViewModels\PaginationModel.cs" />
     <Compile Include="Models\ViewModels\ChatGroupViewModel.cs" />
@@ -164,9 +169,7 @@
   <ItemGroup>
     <Compile Include="Models\BaseModels\LazyLoadPagination.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\PostModels\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

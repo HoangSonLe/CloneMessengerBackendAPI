@@ -14,11 +14,15 @@ using LinqKit;
 using System.Runtime.Caching;
 using CloneMessengerBackendAPI.Model.ConfigureModel;
 using CloneMessengerBackendAPI.Service.Interfaces;
+using CloneMessengerBackendAPI.Service.Models.SignalRModels;
 
 namespace CloneMessengerBackendAPI.Service.Serviecs
 {
     public class MessageServices : BaseService, IMessageService
     {
+        public MessageServices(IChatHubService hub) : base(hub)
+        {
+        }
         #region API
         /// <summary>
         /// Get list of chat group
@@ -73,6 +77,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     {
                         //Text = lm.ChatTextMessage.Text,
                         CreatedByName = u.DisplayName,
+                        MessageStatus = group.IsRead ? EMessageStatus.Read : EMessageStatus.Sent
                     };
                     group.LastMessage.MapDTOChatMessage(lm);
                 }
@@ -96,7 +101,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         /// </summary>
         /// <param name="chatGroupId"></param>
         /// <returns></returns>
-        public async Task<Acknowledgement> ReadLastMessage(Guid chatGroupId,Guid currentUserId)
+        public async Task<Acknowledgement> ReadLastMessage(Guid chatGroupId, Guid currentUserId)
         {
             var ack = new Acknowledgement();
             var context = DbContext;
@@ -164,7 +169,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             }
             var messages = await messageQuery.ToListAsync();
             //Neu group thay doi thu tu list thi bo order o query
-            var groupByTime = messages.GroupBy(i=> i.ContinuityKeyByTime).ToList();
+            var groupByTime = messages.GroupBy(i => i.ContinuityKeyByTime).ToList();
             var result = new List<ChatMessageGroupByTimeViewModel>();
             groupByTime.ForEach(i =>
             {
@@ -177,12 +182,15 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     {
                         ContinuityKeyByUser = k.Key,
                         IsMyMessage = k.First().CreatedBy == post.CurrentUser.Id,
-                        Messages = k.Select(j => MapChatMessageViewModel(j, j.User)).ToList()
+                        Messages = k.Select(j => MapChatMessageViewModel(j, new UserViewModel()
+                        {
+                            Id = j.User.Id,
+                            DisplayName = j.User.DisplayName
+                        })).ToList()
                     }).OrderBy(j => j.Messages.First().CreatedDate).ToList()
                 };
                 result.Add(groupTime);
             });
-            //var result = messages.Select(i => MapChatMessageViewModel(i, i.User)).OrderBy(i => i.CreatedDate).ToList();
             var nextSkip = post.Skip + messages.Count();
             ack.Data = new PaginationModel<List<ChatMessageGroupByTimeViewModel>>()
             {
@@ -204,7 +212,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             var context = DbContext;
             var ack = new Acknowledgement<ChatGroupDetailViewModel>();
             //Read last message before load message detail
-            var readLastAck = await ReadLastMessage(post.ChatGroupId,post.CurrentUser.Id);
+            var readLastAck = await ReadLastMessage(post.ChatGroupId, post.CurrentUser.Id);
             if (readLastAck.IsSuccess == false)
             {
                 ack.IsSuccess = readLastAck.IsSuccess;
@@ -233,7 +241,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 Name = queryG.Name,
                 ListMembers = queryG.ChatMembers.Select(i => MapChatMemberViewModel(i.User, i.AddedUser)).ToList(),
                 GroupMessageListByTime = messagesAck.Data,
-                IsRemoved = queryG.ChatMembers.Any(i=> i.UserId == post.CurrentUser.Id && i.IsRemoved == true),
+                IsRemoved = queryG.ChatMembers.Any(i => i.UserId == post.CurrentUser.Id && i.IsRemoved == true),
                 DefaultChatMessage = new ChatMessagePostData()
                 {
                     GroupId = queryG.Id,
@@ -262,6 +270,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             var ack = new Acknowledgement();
             var context = DbContext;
             var gr = await context.ChatGroups.Where(i => i.Id == post.GroupId)
+                                             .Include(i => i.ChatMembers)
                                              .Include(i => i.UserLastReadMessages)
                                              .FirstOrDefaultAsync();
             if (gr == null)
@@ -302,11 +311,48 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     Time = DateTime.Now
                 });
             }
-
+            //Call SignalR SendMessage
+            var mes = new ChatMessageGroupByUserViewModel()
+            {
+                ContinuityKeyByUser = cm.ContinuityKeyByUser,
+                IsMyMessage = cm.CreatedBy == currentUserId,
+                Messages = new List<ChatMessageViewModel>()
+                {
+                    MapChatMessageViewModel(cm,new UserViewModel(post.CurrentUser),EMessageStatus.Sending)
+                },
+            };
+            var signalRModel = new MessageSignalRModel()
+            {
+                IsNewGroupByTime = cacheGroup.IsNewGroupByTime,
+                IsNewGroupByUser = cacheGroup.IsNewGroupByUser,
+                MessageGroupByTime = new ChatMessageGroupByTimeViewModel()
+                {
+                    ContinuityKeyByTime = cm.ContinuityKeyByTime,
+                    GroupMessageTime = cm.CreatedDate,
+                    GroupMessageListByUser = new List<ChatMessageGroupByUserViewModel>()
+                    {
+                       mes
+                    },
+                },
+                MessageGroupByUser = mes
+            };
+            var memberIds = gr.ChatMembers.Where(j => j.IsRemoved == false).Select(i => i.UserId).ToList();
+            //Call SignalR with stauts Sending
+            ChatHub.SendMessage(signalRModel, memberIds);
             await ack.TrySaveChangesAsync(context);
             if (ack.IsSuccess == true)
             {
-                //Call SignalR
+                var tmp = new MessageSignalRWithStatus()
+                {
+                    GroupId = gr.Id,
+                    KeyGroupByTime = cm.ContinuityKeyByTime,
+                    KeyGroupByUser = cm.ContinuityKeyByUser,
+                    MessageId = cm.Id,
+                    Status = EMessageStatus.Sent,
+                    UserReadMessageList = new List<Guid>() { currentUserId }
+                };
+                //Call SignalR with status SENT
+                ChatHub.UpdateStatusMessage(tmp, memberIds);
             }
             return ack;
         }
@@ -391,11 +437,12 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         }
         #endregion
         #region Others
-        public ChatMessageViewModel MapChatMessageViewModel(ChatMessage m, User u)
+        public ChatMessageViewModel MapChatMessageViewModel(ChatMessage m, UserViewModel u, EMessageStatus status = EMessageStatus.Sent)
         {
             var cm = new ChatMessageViewModel();
             cm.MapDTOChatMessage(m);
             cm.CreatedByName = u.DisplayName;
+            cm.MessageStatus = status;
             return cm;
         }
         public ChatMemberViewModel MapChatMemberViewModel(User m, User addBy)
@@ -494,4 +541,3 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
     }
 
 }
- 

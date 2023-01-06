@@ -16,9 +16,10 @@ namespace CloneMessengerBackendAPI.Web.API
     [EnableCors(origins: "*", headers: "*", methods: "*")]
     public class UserController : BaseAPIController
     {
-        public UserController(IServiceLocator serviceLocator) : base(serviceLocator)
+        public UserController(IUserService userService, IMessageService messageService) : base(userService, messageService)
         {
         }
+
         [AllowAnonymous]
         // GET: User
         public async Task<IHttpActionResult> Login(LoginModel model)

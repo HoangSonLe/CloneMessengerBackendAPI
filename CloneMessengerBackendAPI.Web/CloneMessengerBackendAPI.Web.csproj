@@ -233,6 +233,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Hubs\ChatHub.cs" />
+    <Compile Include="Hubs\ConnectionMapping.cs" />
     <Compile Include="Hubs\UserConnection.cs" />
     <Compile Include="Mapping\AutoMapperConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -302,10 +303,6 @@
     <Content Include="Scripts\jquery-3.4.1.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CloneMessengerBackendAPI.Data\CloneMessengerBackendAPI.Data.csproj">
-      <Project>{c34584f9-0a7c-4ba2-990b-4d980de0b79f}</Project>
-      <Name>CloneMessengerBackendAPI.Data</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CloneMessengerBackendAPI.Model\CloneMessengerBackendAPI.Model.csproj">
       <Project>{c0db8926-e26c-4ea4-b715-7fc42194c4a9}</Project>
       <Name>CloneMessengerBackendAPI.Model</Name>

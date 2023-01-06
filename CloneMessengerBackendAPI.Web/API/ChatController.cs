@@ -4,6 +4,7 @@ using CloneMessengerBackendAPI.Service.Models;
 using CloneMessengerBackendAPI.Service.Models.BaseModels;
 using CloneMessengerBackendAPI.Service.Models.ViewModels;
 using CloneMessengerBackendAPI.Service.Serviecs;
+using CloneMessengerBackendAPI.Web.Hubs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace CloneMessengerBackendAPI.Web.API
     [Authorize]
     public class ChatController : BaseAPIController
     {
-        public ChatController(IServiceLocator serviceLocator) : base(serviceLocator)
+        public ChatController(IUserService userService, IMessageService messageService) : base(userService, messageService)
         {
         }
 
@@ -38,7 +39,7 @@ namespace CloneMessengerBackendAPI.Web.API
         // GET: ChatGroup
         public async Task<IHttpActionResult> GetChatGroupList(PaginationModel post)
         {
-            var p = post == null ?new PaginationModel() : post;
+            var p = post == null ? new PaginationModel() : post;
             p.CurrentUser = GetCurrentUserModel();
             var result = await MessageServices.GetChatGroups(p);
             return MapToIHttpActionResult(result);
@@ -48,8 +49,8 @@ namespace CloneMessengerBackendAPI.Web.API
         {
             post.CurrentUser = GetCurrentUserModel();
             var result = await MessageServices.GetChatGroupDetail(post);
-            return MapToIHttpActionResult(result)   ;
-        } 
+            return MapToIHttpActionResult(result);
+        }
         [HttpPost]
         public async Task<IHttpActionResult> GetMessageList(ChatMessagePaginationModel post)
         {
@@ -63,7 +64,7 @@ namespace CloneMessengerBackendAPI.Web.API
             post.CurrentUser = GetCurrentUserModel();
             var result = await MessageServices.SendMessage(post);
             return MapToIHttpActionResult(result);
-        } 
+        }
         [HttpPost]
         public async Task<IHttpActionResult> GetUserList(string searchValue)
         {

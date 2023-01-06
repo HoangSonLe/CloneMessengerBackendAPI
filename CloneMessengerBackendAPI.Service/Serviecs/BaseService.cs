@@ -1,4 +1,5 @@
 ﻿using CloneMessengerBackendAPI.Model.Model;
+using CloneMessengerBackendAPI.Service.Interfaces;
 using CloneMessengerBackendAPI.Service.Models.BaseModels;
 using CloneMessengerBackendAPI.Service.Models.ViewModels;
 using System;
@@ -14,6 +15,13 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
 {
     public abstract class BaseService : IDisposable
     {
+        private readonly IChatHubService _hub;
+        public IChatHubService ChatHub => _hub;
+
+        public BaseService(IChatHubService hub)
+        {
+            _hub = hub;
+        }
         private CloneMessengerDbContext _DbContext;
         public CloneMessengerDbContext DbContext
         {
