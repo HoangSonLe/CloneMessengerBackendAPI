@@ -9,6 +9,7 @@ namespace CloneMessengerBackendAPI.Service.Models.SignalRModels
 {
     public class MessageSignalRModel
     {
+        public Guid ChatGroupId { get; set; }
         public bool IsNewGroupByUser { get; set; }
         public bool IsNewGroupByTime { get; set; }
         public ChatMessageGroupByTimeViewModel MessageGroupByTime { get; set; }

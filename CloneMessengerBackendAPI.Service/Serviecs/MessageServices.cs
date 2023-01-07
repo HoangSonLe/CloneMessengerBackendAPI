@@ -186,7 +186,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                         {
                             Id = j.User.Id,
                             DisplayName = j.User.DisplayName
-                        })).ToList()
+                        })).OrderBy(j=> j.CreatedDate).ToList()
                     }).OrderBy(j => j.Messages.First().CreatedDate).ToList()
                 };
                 result.Add(groupTime);
@@ -266,9 +266,9 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         {
             //User post message => signalR message with status SENDING to user
             //Service save message sucess => signalR message with status SENT to all user
-            var cacheGroup = CacheMessage.GetCacheGroupMessage(post.CurrentUser.Id);
             var ack = new Acknowledgement();
             var context = DbContext;
+            var cacheGroup = CacheMessage.GetOrCreateCacheGroup(context,post.GroupId,post.CurrentUser.Id);
             var gr = await context.ChatGroups.Where(i => i.Id == post.GroupId)
                                              .Include(i => i.ChatMembers)
                                              .Include(i => i.UserLastReadMessages)
@@ -323,6 +323,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             };
             var signalRModel = new MessageSignalRModel()
             {
+                ChatGroupId = cm.GroupId,
                 IsNewGroupByTime = cacheGroup.IsNewGroupByTime,
                 IsNewGroupByUser = cacheGroup.IsNewGroupByUser,
                 MessageGroupByTime = new ChatMessageGroupByTimeViewModel()
@@ -336,9 +337,12 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 },
                 MessageGroupByUser = mes
             };
-            var memberIds = gr.ChatMembers.Where(j => j.IsRemoved == false).Select(i => i.UserId).ToList();
-            //Call SignalR with stauts Sending
-            ChatHub.SendMessage(signalRModel, memberIds);
+            //Call SignalR with stauts Sending currentUser
+            await ChatHub.SendMessage(signalRModel, new List<Guid>() { currentUserId });
+            var memberIds = gr.ChatMembers.Where(j => j.IsRemoved == false && j.UserId != currentUserId).Select(i => i.UserId).ToList();
+            mes.IsMyMessage = false;
+            //Call SignalR with stauts Sending otherMembers
+            await ChatHub.SendMessage(signalRModel, memberIds);
             await ack.TrySaveChangesAsync(context);
             if (ack.IsSuccess == true)
             {
@@ -352,7 +356,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     UserReadMessageList = new List<Guid>() { currentUserId }
                 };
                 //Call SignalR with status SENT
-                ChatHub.UpdateStatusMessage(tmp, memberIds);
+                await ChatHub.UpdateStatusMessage(tmp, memberIds);
             }
             return ack;
         }

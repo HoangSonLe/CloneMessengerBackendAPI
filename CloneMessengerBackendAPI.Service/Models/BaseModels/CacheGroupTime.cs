@@ -1,6 +1,9 @@
 ﻿using CloneMessengerBackendAPI.Model.ConfigureModel;
+using CloneMessengerBackendAPI.Model.Model;
+using CloneMessengerBackendAPI.Service.Models.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Text;
@@ -10,7 +13,57 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
 {
     public static class CacheMessage
     {
-        public static CacheGroupModel GetCacheGroupMessage(Guid userId)
+        public static CacheGroupModel GetOrCreateCacheGroup(CloneMessengerDbContext context,Guid chatGroupId, Guid userId)
+        {
+            MemoryCache cache = MemoryCache.Default;
+            CacheGroupModel result = null;
+            CacheItem cacheItem = null;
+            cacheItem = cache.GetCacheItem(chatGroupId.ToString());
+            if (cacheItem != null)
+            {
+                result = (CacheGroupModel)cacheItem.Value;
+                result = ProcessingCacheGroupMessage(result,userId);
+                cache.Remove(chatGroupId.ToString());
+            }
+            else
+            {
+                result = CreateCacheGroupModel(context, chatGroupId, userId);
+            }
+            cache.Set(chatGroupId.ToString(), result, Config.Default.ExpireTimeCache);
+
+            var myCache = (CacheGroupModel)cache.GetCacheItem(chatGroupId.ToString()).Value;
+
+            return myCache;
+        }
+        private static CacheGroupModel CreateCacheGroupModel(CloneMessengerDbContext context, Guid chatGroupId,Guid userId)
+        {
+            var g = context.ChatGroups.Where(i=> i.Id == chatGroupId)
+                                            .Include(i=> i.LastChatMessage)
+                                            .First();
+            var dateTime = DateTime.Now;
+            var c = new CacheGroupModel()
+            {
+                StartingTime = dateTime,
+                PreviousKeyGroupByTime = null as Guid?,
+                KeyGroupByTime = Guid.NewGuid(),
+                PreviousSendMessageUserId = null as Guid?,
+                KeyGroupByUserId = Guid.NewGuid(),
+                CurrentSendMessageUserId = userId,
+            };
+            if (g.LastChatMessage != null)
+            {
+                var l = g.LastChatMessage;
+                var date = context.ChatMessages.Where(i => i.ContinuityKeyByTime == l.ContinuityKeyByTime)
+                                                     .OrderBy(i => i.CreatedDate).Select(i => i.CreatedDate)
+                                                     .First();
+                c.StartingTime = date;
+                c.PreviousKeyGroupByTime = l.ContinuityKeyByTime;
+                c.PreviousSendMessageUserId = l.CreatedBy;
+            }
+            return c;
+
+        }
+        private static CacheGroupModel ProcessingCacheGroupMessage(CacheGroupModel currentCache, Guid userId)
         {
             //Thời gian gửi tin nhắn trừ CachePreviousSendMessage (thời gian bắt đầu tính group message)
             //Nếu kq <= setting time cho 1 group message by time => keyGroupByTime xài cái key trong key
@@ -22,52 +75,33 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
 
             // Time : StartingGroupTime + KeyGroupByTime in Cache, SettingTime tính cho group
             // User : PreviousSendMessageUserId + KeyGroupByUser
-            var keyGroupMessageCache = SettingKey.CacheGroupMessageKey;
-
-            MemoryCache cache = MemoryCache.Default;
-            var dateTime = DateTime.Now;
-            var c = new CacheGroupModel()
-            {
-                StartingTime = dateTime,
-                PreviousKeyGroupByTime = null as Guid?,
-                KeyGroupByTime = Guid.NewGuid(),
-                KeyGroupByUserId = Guid.NewGuid(),
-                PreviousSendMessageUserId = null as Guid?,
-                CurrentSendMessageUserId = userId
-            };
-            CacheItem newCache = new CacheItem(keyGroupMessageCache, c);
-
-            //Nếu ko có keyCache => Tạo mới
-            if (cache.Contains(keyGroupMessageCache) == false)
-            {
-                cache.Set(newCache, null);
-            }
-            else //Nếu có keyCache
-            {
                 
-                var currentCache = (CacheGroupModel)cache.GetCacheItem(keyGroupMessageCache).Value;
+                var dateTime = DateTime.Now;
                 var subTime = dateTime.Subtract(currentCache.StartingTime);
-                var settingTime = new TimeSpan(DefaultConfig.DefaultHourTMessageInGroupMessage, 0, 0);
+                var settingTime = DefaultConfig.DefaultHourMessageInGroupMessage;
 
-                // Gán userId lại cho cache
-                c.PreviousSendMessageUserId = c.CurrentSendMessageUserId;
-                c.CurrentSendMessageUserId = userId;
-                if (subTime <= settingTime)
+                // Gán userId lại cho cache mỗi lần sendMessage
+                currentCache.PreviousSendMessageUserId = currentCache.CurrentSendMessageUserId;
+                currentCache.CurrentSendMessageUserId = userId;
+                // Gán previousKeyGroupTime lại cho cache mỗi lần sendMessage
+                currentCache.PreviousKeyGroupByTime = currentCache.KeyGroupByTime;
+
+                if (subTime <= settingTime) //Không tạo group time mới
                 {
-                    if (currentCache.PreviousSendMessageUserId != c.CurrentSendMessageUserId)
+                    if (currentCache.PreviousSendMessageUserId != currentCache.CurrentSendMessageUserId)
                     {
-                        c.KeyGroupByUserId = Guid.NewGuid();
+                        //Tạo mới cho keyGroupUser
+                        currentCache.KeyGroupByUserId = Guid.NewGuid();
                     }
                 }
-                else
+                else //Tạo mới group time
                 {
-                    c.PreviousKeyGroupByTime = currentCache.KeyGroupByTime;
-                    cache.Set(newCache, null);
+                    //Tạo mới cho keyGroupTime và keyGroupUser
+                    currentCache.KeyGroupByTime = Guid.NewGuid();
+                    currentCache.KeyGroupByUserId = Guid.NewGuid();
                 }
-            }
-            var myCache = (CacheGroupModel)cache.GetCacheItem(keyGroupMessageCache).Value;
 
-            return myCache;
+            return currentCache;
         }
     }
 
@@ -103,7 +137,7 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
         /// <summary>
         /// Check có tạo mới group user của messages
         /// </summary>
-        public bool IsNewGroupByUser => PreviousSendMessageUserId != CurrentSendMessageUserId;
+        public bool IsNewGroupByUser => IsNewGroupByTime || PreviousSendMessageUserId != CurrentSendMessageUserId;
 
     }
 }

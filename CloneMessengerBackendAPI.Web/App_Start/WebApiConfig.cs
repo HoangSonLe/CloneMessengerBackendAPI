@@ -1,11 +1,18 @@
-﻿using Newtonsoft.Json;
+﻿using CloneMessengerBackendAPI.Web.App_Start;
+using Microsoft.AspNet.SignalR;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Web.Helpers;
 using System.Web.Http;
+using System.Web.Mvc;
+using System.Web.Optimization;
+using System.Web.Routing;
 
 namespace CloneMessengerBackendAPI.Web
 {
@@ -13,22 +20,24 @@ namespace CloneMessengerBackendAPI.Web
     {
         public static void Register(HttpConfiguration config)
         {
-            // Web API configuration and services
-            config.Formatters.Remove(config.Formatters.XmlFormatter);
-
-            // setup camel-case for property names
-            var jsonFormat = GlobalConfiguration.Configuration.Formatters.JsonFormatter;
-            var settings = jsonFormat.SerializerSettings;
-            settings.Formatting = Newtonsoft.Json.Formatting.Indented;
-            settings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-            settings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
-            settings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-            settings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Error;
-            settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                DateTimeZoneHandling = DateTimeZoneHandling.Local,
+                DateFormatString = "yyyy-MM-dd HH:mm:ss",
+                ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Error,
+            };
+            settings.ContractResolver = new WebSerializerSetting();
+            var serializer = JsonSerializer.Create(settings);
+            GlobalHost.DependencyResolver.Register(typeof(JsonSerializer), () => serializer);
+            GlobalConfiguration.Configuration.Formatters.Remove(GlobalConfiguration.Configuration.Formatters.XmlFormatter);
+            var json = GlobalConfiguration.Configuration.Formatters.JsonFormatter;
+            json.SerializerSettings = settings;
             // Web API routes
             config.MapHttpAttributeRoutes();
             config.EnableCors();
+
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",

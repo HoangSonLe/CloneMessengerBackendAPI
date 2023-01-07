@@ -11,6 +11,6 @@ namespace CloneMessengerBackendAPI.Service.Interfaces
     {
         void test();
         Task SendMessage(MessageSignalRModel model, List<Guid> userIds);
-        void UpdateStatusMessage(MessageSignalRWithStatus model, List<Guid> userIds);
+        Task UpdateStatusMessage(MessageSignalRWithStatus model, List<Guid> userIds);
     }
 }
