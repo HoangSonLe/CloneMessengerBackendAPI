@@ -15,7 +15,21 @@ namespace CloneMessengerBackendAPI.Service.Models.SignalRModels
         public ChatMessageGroupByTimeViewModel MessageGroupByTime { get; set; }
         public ChatMessageGroupByUserViewModel MessageGroupByUser { get; set; }
     }
-    public class MessageSignalRWithStatus
+    public class MessageStatus 
+    { 
+        public Guid ChatGroupId { get; set;}
+        public List<MessageStatusItem> MessageStatusItemList { get; set; }
+
+    }
+    public class MessageStatusItem
+    {
+        public Guid ChatMessageId { get; set; }
+        public DateTime ReadTime { get; set; }
+        public DateTime LastMessageCreatedDate { get; set; }
+        public Guid UserId { get; set; }
+        public string UserName { get; set; }
+    }
+    public class MessageInforModel
     {
         public Guid GroupId { get; set; }
 
@@ -25,10 +39,8 @@ namespace CloneMessengerBackendAPI.Service.Models.SignalRModels
 
         public Guid MessageId { get; set; }
         public EMessageStatus Status { get; set; }  
-        public List<Guid> UserReadMessageList { get; set; }
-        public MessageSignalRWithStatus()
+        public MessageInforModel()
         {
-            UserReadMessageList = new List<Guid>();
             Status = EMessageStatus.Sent;
         }
     }

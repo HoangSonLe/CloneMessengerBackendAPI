@@ -267,6 +267,7 @@
     </Compile>
     <Compile Include="Hubs\ChatHub.cs" />
     <Compile Include="Hubs\ConnectionMapping.cs" />
+    <Compile Include="Hubs\SignalRContractResolver.cs" />
     <Compile Include="Hubs\UserConnection.cs" />
     <Compile Include="Mapping\AutoMapperConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

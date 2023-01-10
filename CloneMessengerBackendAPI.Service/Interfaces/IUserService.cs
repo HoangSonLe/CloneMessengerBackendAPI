@@ -10,6 +10,6 @@ namespace CloneMessengerBackendAPI.Service.Interfaces
 {
     public interface IUserService : IBasicService
     {
-        Task<Acknowledgement<string>> Login(LoginModel post);
+        Task<Acknowledgement<LoginResultModel>> Login(LoginModel post);
     }
 }

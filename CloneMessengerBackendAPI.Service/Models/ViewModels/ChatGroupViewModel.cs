@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CloneMessengerBackendAPI.Service.Models.BaseModels;
+using CloneMessengerBackendAPI.Service.Models.SignalRModels;
 
 namespace CloneMessengerBackendAPI.Service.Models.ViewModels
 {
@@ -23,6 +24,7 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
         public Guid? LastMessageId { get; set; }
 
         public bool IsRead { get; set; }
+        public MessageStatus MessageStatus { get; set; }
         public ChatMessageViewModel LastMessage { get; set; } //thông tin tin nhắn cuối cùng
     }
 

@@ -1,4 +1,5 @@
 ﻿using CloneMessengerBackendAPI.Model.Model;
+using CloneMessengerBackendAPI.Service.Models.SignalRModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,6 +16,7 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
         public string Name { get; set; }
         public bool IsGroup { get; }
         public bool IsRemoved { get; set; }
+        public MessageStatus MessageStatus { get; set; }
         //public List<ChatMessageViewModel> MessageList { get; set; }
         public PaginationModel<List<ChatMessageGroupByTimeViewModel>> GroupMessageListByTime { get; set; }
         public List<ChatMemberViewModel> ListMembers { get; set; }

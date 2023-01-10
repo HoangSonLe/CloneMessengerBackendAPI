@@ -17,10 +17,10 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         {
         }
 
-        public async Task<Acknowledgement<string>> Login(LoginModel post)
+        public async Task<Acknowledgement<LoginResultModel>> Login(LoginModel post)
         {
             var context = DbContext;
-            var ack = new Acknowledgement<string>();
+            var ack = new Acknowledgement<LoginResultModel>();
             if(string.IsNullOrEmpty(post.UserName) || string.IsNullOrEmpty(post.Password))
             {
                 ack.AddMessages("Please fill username and password!");
@@ -44,7 +44,11 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             });
 
             ack.IsSuccess = true;
-            ack.Data = token;
+            ack.Data = new LoginResultModel()
+            {
+                Token = token,
+                UserId = user.Id,
+            };
             return ack;
         }
     }

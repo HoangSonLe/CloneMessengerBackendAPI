@@ -22,7 +22,6 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
             if (cacheItem != null)
             {
                 result = (CacheGroupModel)cacheItem.Value;
-                result = ProcessingCacheGroupMessage(result,userId);
                 cache.Remove(chatGroupId.ToString());
             }
             else
@@ -59,8 +58,11 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
                 c.StartingTime = date;
                 c.PreviousKeyGroupByTime = l.ContinuityKeyByTime;
                 c.PreviousSendMessageUserId = l.CreatedBy;
+                c.KeyGroupByUserId = l.ContinuityKeyByUser;
+                c.KeyGroupByTime = l.ContinuityKeyByTime;
             }
-            return c;
+
+            return ProcessingCacheGroupMessage(c,userId);
 
         }
         private static CacheGroupModel ProcessingCacheGroupMessage(CacheGroupModel currentCache, Guid userId)

@@ -21,7 +21,8 @@ namespace CloneMessengerBackendAPI.Web.Hubs
     {
         void test(MessageSignalRModel model);
         Task sendMessage(MessageSignalRModel model);
-        Task updateStatusMessage(MessageSignalRWithStatus model);
+        Task updateMessageInfo(MessageInforModel model);
+        Task updateStatusReadMessage(MessageStatus model);
     }
     public class ChatHub : Hub<IChatHub>,IChatHubService
     {
@@ -102,10 +103,15 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         {
             Clients.All.test(new MessageSignalRModel() { });
         }
-        public async Task UpdateStatusMessage(MessageSignalRWithStatus model, List<Guid> userIds)
-        {
+        public async Task UpdateStatusReadMessage(MessageStatus model, List<Guid> userIds)
+        {   
             var conIds = GetConnectionIdsByUserIds(userIds);
-            await ChatHubContext.Clients(conIds).updateStatusMessage(model);
+            await ChatHubContext.Clients(conIds).updateStatusReadMessage(model);
+        } 
+        public async Task UpdateMessageInfo(MessageInforModel model, List<Guid> userIds)
+        {   
+            var conIds = GetConnectionIdsByUserIds(userIds);
+            await ChatHubContext.Clients(conIds).updateMessageInfo(model);
         }
         public async Task SendMessage(MessageSignalRModel model, List<Guid> userIds)
         {
@@ -116,30 +122,4 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         #endregion
     }
 
-    public class SignalRContractResolver : IContractResolver
-    {
-
-        private readonly Assembly assembly;
-        private readonly IContractResolver camelCaseContractResolver;
-        private readonly IContractResolver defaultContractSerializer;
-
-        public SignalRContractResolver()
-        {
-            defaultContractSerializer = new DefaultContractResolver();
-            camelCaseContractResolver = new CamelCasePropertyNamesContractResolver();
-            assembly = typeof(Connection).Assembly;
-        }
-
-        public JsonContract ResolveContract(Type type)
-        {
-            if (type.Assembly.Equals(assembly))
-            {
-                return defaultContractSerializer.ResolveContract(type);
-
-            }
-
-            return camelCaseContractResolver.ResolveContract(type);
-        }
-
-    }
 }

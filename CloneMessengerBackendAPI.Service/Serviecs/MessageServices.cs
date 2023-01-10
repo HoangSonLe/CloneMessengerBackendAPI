@@ -37,15 +37,14 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             var seftGroupIds = context.ChatMembers.Where(i => i.UserId == currentUserId).Select(i => i.ChatGroupId);
             var queryGroup = context.ChatGroups.Where(i => seftGroupIds.Contains(i.Id));
             var query = (from gr in queryGroup
-                         join lm in context.UserLastReadMessages.Where(i => i.UserId == currentUserId)
-                         on gr.Id equals lm.ChatGroupId into lm1
-                         from lm in lm1.DefaultIfEmpty()
+                             //join lm in context.UserLastReadMessages.Where(i => i.UserId == currentUserId)
+                             //on gr.Id equals lm.ChatGroupId into lm1
+                             //from lm in lm1.DefaultIfEmpty()
                          select new
                          {
                              ChatGroup = gr,
                              LastMessage = gr.LastChatMessage,
-                             LastReadMessage = lm,
-                             ChatTextMessage = gr.LastChatMessage.ChatTextMessage,
+                             //LastReadMessage = lm,
                          }).OrderByDescending(i => i.LastMessage != null ? i.LastMessage.CreatedDate : i.ChatGroup.CreatedDate).AsQueryable();
 
             if (post.PageSize.HasValue)
@@ -58,12 +57,20 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                                join cm in context.ChatMembers on g.Id equals cm.ChatGroupId
                                join u in context.Users on cm.UserId equals u.Id
                                select u).ToListAsync();
-
+            var lastReadMessage = await context.UserLastReadMessages.Where(i => i.UserId == currentUserId && seftGroupIds.Contains(i.ChatGroupId)).ToListAsync();
+            var join = (from g in groupData
+                        join l in lastReadMessage on g.ChatGroup.Id equals l.ChatGroupId
+                        select new
+                        {
+                            Group = g,
+                            LastReadMessage = l
+                        }).ToList();
             var listChatGroup = new List<ChatGroupViewModel>();
-            foreach (var g in groupData)
+            foreach (var item in join)
             {
+                var g = item.Group;
                 var gr = g.ChatGroup;
-                var lrm = g.LastReadMessage;
+                var lrm = item.LastReadMessage;
                 var lm = g.LastMessage;
                 var group = new ChatGroupViewModel()
                 {
@@ -75,11 +82,11 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     var u = users.First(i => i.Id == g.LastMessage.CreatedBy);
                     group.LastMessage = new ChatMessageViewModel()
                     {
-                        //Text = lm.ChatTextMessage.Text,
                         CreatedByName = u.DisplayName,
                         MessageStatus = group.IsRead ? EMessageStatus.Read : EMessageStatus.Sent
                     };
                     group.LastMessage.MapDTOChatMessage(lm);
+                    group.MessageStatus = await GetMessageStatus(g.ChatGroup.Id);
                 }
                 listChatGroup.Add(group);
             }
@@ -105,9 +112,14 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         {
             var ack = new Acknowledgement();
             var context = DbContext;
-            var lastMessage = await (from g in context.ChatGroups.Where(i => i.Id == chatGroupId)
-                                     join cm in context.ChatMessages on g.LastMessageId equals cm.Id
-                                     select cm).FirstOrDefaultAsync();
+            var queryData = await (from g in context.ChatGroups.Where(i => i.Id == chatGroupId)
+                                   join cm in context.ChatMessages on g.LastMessageId equals cm.Id
+                                   select new
+                                   {
+                                       ChatMessage = cm,
+                                       ChatMembers = g.ChatMembers.Where(i => i.IsRemoved == false)
+                                   }).FirstOrDefaultAsync();
+            var lastMessage = queryData.ChatMessage;
             if (lastMessage != null)
             {
                 var isNeedSave = true;
@@ -141,6 +153,10 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 if (isNeedSave == true)
                 {
                     await ack.TrySaveChangesAsync(context);
+                    var tmp = await GetMessageStatus(lastMessage.GroupId);
+                    var memberIds = queryData.ChatMembers.Where(i => i.UserId != currentUserId).Select(i => i.UserId).ToList();
+                    //Call SignalR with status SENT for sender
+                    await ChatHub.UpdateStatusReadMessage(tmp, memberIds);
                 }
                 if (ack.IsSuccess == false)
                 {
@@ -186,7 +202,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                         {
                             Id = j.User.Id,
                             DisplayName = j.User.DisplayName
-                        })).OrderBy(j=> j.CreatedDate).ToList()
+                        })).OrderBy(j => j.CreatedDate).ToList()
                     }).OrderBy(j => j.Messages.First().CreatedDate).ToList()
                 };
                 result.Add(groupTime);
@@ -201,6 +217,28 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             ack.IsSuccess = true;
             return ack;
 
+        }
+        public async Task<MessageStatus> GetMessageStatus(Guid chatGroupId)
+        {
+            var context = DbContext;
+            var lmList = await context.UserLastReadMessages.Where(i => i.ChatGroupId == chatGroupId)
+                                                           .Include(i => i.ChatMessage)
+                                                           .Include(i => i.User)
+                                                           .ToListAsync();
+            var l = lmList.Select(i => new MessageStatusItem()
+            {
+                ChatMessageId = i.LastReadMessageId,
+                ReadTime = i.Time,
+                LastMessageCreatedDate = i.ChatMessage.CreatedDate,
+                UserId = i.UserId,
+                UserName = i.User.DisplayName,
+            }).ToList();
+            var result = new MessageStatus()
+            {
+                ChatGroupId = chatGroupId,
+                MessageStatusItemList = l,
+            };
+            return result;
         }
         /// <summary>
         /// Get chat message detail (list messages, list members,...)
@@ -224,7 +262,8 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                                              .Include(i => i.ChatMembers)
                                              .Include(i => i.ChatMembers.Select(j => j.User))
                                              .Include(i => i.ChatMembers.Select(j => j.AddedUser))
-                                             .Include(i => i.UserLastReadMessages).FirstOrDefaultAsync();
+                                             //.Include(i => i.UserLastReadMessages)
+                                             .FirstOrDefaultAsync();
 
 
 
@@ -246,8 +285,9 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 {
                     GroupId = queryG.Id,
                     Text = string.Empty,
-                }
+                },
             };
+            result.MessageStatus = await GetMessageStatus(queryG.Id);
             if (result.IsGroup)
             {
                 result.Name = queryG.ChatMembers.First(i => i.UserId != post.CurrentUser.Id).User.DisplayName;
@@ -268,10 +308,10 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             //Service save message sucess => signalR message with status SENT to all user
             var ack = new Acknowledgement();
             var context = DbContext;
-            var cacheGroup = CacheMessage.GetOrCreateCacheGroup(context,post.GroupId,post.CurrentUser.Id);
+            var cacheGroup = CacheMessage.GetOrCreateCacheGroup(context, post.GroupId, post.CurrentUser.Id);
             var gr = await context.ChatGroups.Where(i => i.Id == post.GroupId)
                                              .Include(i => i.ChatMembers)
-                                             .Include(i => i.UserLastReadMessages)
+                                             //.Include(i => i.UserLastReadMessages)
                                              .FirstOrDefaultAsync();
             if (gr == null)
             {
@@ -297,10 +337,12 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             };
             gr.LastMessageId = cm.Id;
             gr.LastChatMessage = cm;
+            //Cập nhật lại userlastread
             var ulrm = gr.UserLastReadMessages.Where(i => i.UserId == currentUserId).FirstOrDefault();
             if (ulrm != null)
             {
                 ulrm.Time = DateTime.Now;
+                ulrm.LastReadMessageId = cm.Id;
             }
             else
             {
@@ -339,24 +381,27 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             };
             //Call SignalR with stauts Sending currentUser
             await ChatHub.SendMessage(signalRModel, new List<Guid>() { currentUserId });
-            var memberIds = gr.ChatMembers.Where(j => j.IsRemoved == false && j.UserId != currentUserId).Select(i => i.UserId).ToList();
-            mes.IsMyMessage = false;
-            //Call SignalR with stauts Sending otherMembers
-            await ChatHub.SendMessage(signalRModel, memberIds);
             await ack.TrySaveChangesAsync(context);
             if (ack.IsSuccess == true)
             {
-                var tmp = new MessageSignalRWithStatus()
+                var memberIds = gr.ChatMembers.Where(j => j.IsRemoved == false && j.UserId != currentUserId).Select(i => i.UserId).ToList();
+                mes.IsMyMessage = false;
+                mes.Messages.ForEach(i =>
+                {
+                    i.MessageStatus = EMessageStatus.Sent;
+                });
+                //Call SignalR with stauts Sending otherMembers
+                await ChatHub.SendMessage(signalRModel, memberIds);
+                var info = new MessageInforModel()
                 {
                     GroupId = gr.Id,
                     KeyGroupByTime = cm.ContinuityKeyByTime,
                     KeyGroupByUser = cm.ContinuityKeyByUser,
                     MessageId = cm.Id,
-                    Status = EMessageStatus.Sent,
-                    UserReadMessageList = new List<Guid>() { currentUserId }
+                    Status = EMessageStatus.Sent
                 };
-                //Call SignalR with status SENT
-                await ChatHub.UpdateStatusMessage(tmp, memberIds);
+                //Call SignalR update status message for sender
+                await ChatHub.UpdateMessageInfo(info, new List<Guid>() { currentUserId });
             }
             return ack;
         }

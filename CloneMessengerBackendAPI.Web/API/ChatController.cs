@@ -45,6 +45,12 @@ namespace CloneMessengerBackendAPI.Web.API
             return MapToIHttpActionResult(result);
         }
         [HttpPost]
+        public async Task<IHttpActionResult> ReadLastMessage(Guid chatGroupId)
+        {
+            var result = await MessageServices.ReadLastMessage(chatGroupId,GetCurrentUserModel().Id);
+            return MapToIHttpActionResult(result);
+        }
+        [HttpPost]
         public async Task<IHttpActionResult> GetChatGroupDetail(ChatMessagePaginationModel post)
         {
             post.CurrentUser = GetCurrentUserModel();
