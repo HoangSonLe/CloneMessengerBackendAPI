@@ -21,7 +21,7 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
             cacheItem = cache.GetCacheItem(chatGroupId.ToString());
             if (cacheItem != null)
             {
-                result = (CacheGroupModel)cacheItem.Value;
+                result = ProcessingCacheGroupMessage((CacheGroupModel)cacheItem.Value, userId);
                 cache.Remove(chatGroupId.ToString());
             }
             else

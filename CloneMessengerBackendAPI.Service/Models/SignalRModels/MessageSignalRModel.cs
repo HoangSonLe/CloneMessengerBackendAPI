@@ -31,7 +31,7 @@ namespace CloneMessengerBackendAPI.Service.Models.SignalRModels
     }
     public class MessageInforModel
     {
-        public Guid GroupId { get; set; }
+        public Guid ChatGroupId { get; set; }
 
         public Guid KeyGroupByTime { get; set; }
 

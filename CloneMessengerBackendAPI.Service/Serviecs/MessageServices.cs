@@ -55,11 +55,11 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
 
             var users = await (from g in queryGroup
                                join cm in context.ChatMembers on g.Id equals cm.ChatGroupId
-                               join u in context.Users on cm.UserId equals u.Id
-                               select u).ToListAsync();
-            var lastReadMessage = await context.UserLastReadMessages.Where(i => i.UserId == currentUserId && seftGroupIds.Contains(i.ChatGroupId)).ToListAsync();
+                               select new {cm,cm.User,cm.AddedUser}).ToListAsync();
+
+            var userLastReadMessages = await context.UserLastReadMessages.Where(i => i.UserId == currentUserId && seftGroupIds.Contains(i.ChatGroupId)).ToListAsync();
             var join = (from g in groupData
-                        join l in lastReadMessage on g.ChatGroup.Id equals l.ChatGroupId
+                        join l in userLastReadMessages on g.ChatGroup.Id equals l.ChatGroupId
                         select new
                         {
                             Group = g,
@@ -72,19 +72,18 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 var gr = g.ChatGroup;
                 var lrm = item.LastReadMessage;
                 var lm = g.LastMessage;
-                var group = new ChatGroupViewModel()
-                {
-                    IsRead = lrm == null ? true : lrm.LastReadMessageId == gr.LastChatMessage.Id,
-                };
+                var group = new ChatGroupViewModel();
                 group.MapDTOChatGroup(gr);
                 if (lm != null)
                 {
-                    var u = users.First(i => i.Id == g.LastMessage.CreatedBy);
+                    //var u = users.First(i => i.Id == g.LastMessage.CreatedBy);
+                    var u = lm.User;
                     group.LastMessage = new ChatMessageViewModel()
                     {
                         CreatedByName = u.DisplayName,
-                        MessageStatus = group.IsRead ? EMessageStatus.Read : EMessageStatus.Sent
+                        MessageStatus = EMessageStatus.Sent,
                     };
+                    group.ListMembers = gr.ChatMembers.Select(i => MapChatMemberViewModel(i.User, i.AddedUser)).ToList();
                     group.LastMessage.MapDTOChatMessage(lm);
                     group.MessageStatus = await GetMessageStatus(g.ChatGroup.Id);
                 }
@@ -154,7 +153,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 {
                     await ack.TrySaveChangesAsync(context);
                     var tmp = await GetMessageStatus(lastMessage.GroupId);
-                    var memberIds = queryData.ChatMembers.Where(i => i.UserId != currentUserId).Select(i => i.UserId).ToList();
+                    var memberIds = queryData.ChatMembers.Select(i => i.UserId).ToList();
                     //Call SignalR with status SENT for sender
                     await ChatHub.UpdateStatusReadMessage(tmp, memberIds);
                 }
@@ -379,6 +378,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 },
                 MessageGroupByUser = mes
             };
+           
             //Call SignalR with stauts Sending currentUser
             await ChatHub.SendMessage(signalRModel, new List<Guid>() { currentUserId });
             await ack.TrySaveChangesAsync(context);
@@ -394,12 +394,14 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 await ChatHub.SendMessage(signalRModel, memberIds);
                 var info = new MessageInforModel()
                 {
-                    GroupId = gr.Id,
+                    ChatGroupId = gr.Id,
                     KeyGroupByTime = cm.ContinuityKeyByTime,
                     KeyGroupByUser = cm.ContinuityKeyByUser,
                     MessageId = cm.Id,
                     Status = EMessageStatus.Sent
                 };
+                //Call signalR mark read
+                await ReadLastMessage(gr.Id, currentUserId);
                 //Call SignalR update status message for sender
                 await ChatHub.UpdateMessageInfo(info, new List<Guid>() { currentUserId });
             }
