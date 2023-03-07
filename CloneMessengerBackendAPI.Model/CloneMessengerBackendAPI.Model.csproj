@@ -72,6 +72,10 @@
     <Compile Include="Migrations\202212311706385_AddColumnContinuityKeyMessages.designer.cs">
       <DependentUpon>202212311706385_AddColumnContinuityKeyMessages.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202303051440047_AddUserIdsChatGroup.cs" />
+    <Compile Include="Migrations\202303051440047_AddUserIdsChatGroup.designer.cs">
+      <DependentUpon>202303051440047_AddUserIdsChatGroup.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\ChatFileAttachment.cs" />
     <Compile Include="Model\User.cs" />
@@ -96,6 +100,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202212311706385_AddColumnContinuityKeyMessages.resx">
       <DependentUpon>202212311706385_AddColumnContinuityKeyMessages.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202303051440047_AddUserIdsChatGroup.resx">
+      <DependentUpon>202303051440047_AddUserIdsChatGroup.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

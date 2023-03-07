@@ -11,7 +11,7 @@ using CloneMessengerBackendAPI.Service.Models.SignalRModels;
 
 namespace CloneMessengerBackendAPI.Service.Models.ViewModels
 {
-    public class ChatGroupViewModel
+    public class BaseChatGroupView
     {
         public Guid Id { get; set; }
 
@@ -21,20 +21,27 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
 
         public DateTime CreatedDate { get; set; }
 
+        public bool IsGroup { get; }
+        public bool IsRemoved { get; set; }
+        public bool IsTmp { get; set; }
+        public List<ChatMemberViewModel> ListMembers { get; set; }
+        public BaseChatGroupView()
+        {
+            ListMembers = new List<ChatMemberViewModel>();
+            IsGroup = ListMembers.Count() > 2;
+        }
+    }
+    public class ChatGroupViewModel : BaseChatGroupView
+    {
         public Guid? LastMessageId { get; set; }
 
         public MessageStatus MessageStatus { get; set; }
-        public List<ChatMemberViewModel> ListMembers { get; set; }
         public ChatMessageViewModel LastMessage { get; set; } //thông tin tin nhắn cuối cùng
-        public ChatGroupViewModel()
-        {
-            ListMembers = new List<ChatMemberViewModel> { };
-        }
     }
 
     public class CreateChatGroupModel : BaseModelWithUserIdentity
     {
-        public List<UserViewModel> Users { get; set; }
-        public ChatMessagePostData ChatMessageData { get; set; }
+        public List<Guid> UserIds { get; set; }
+        public string Text { get; set; }
     }
 }

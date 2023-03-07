@@ -35,11 +35,6 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             }
         }
 
-        public bool GetCurrentStatusOnlineByUserId(Guid userId)
-        {
-            return true;
-        }
-
         public void Dispose()
         {
             DbContext.Dispose();

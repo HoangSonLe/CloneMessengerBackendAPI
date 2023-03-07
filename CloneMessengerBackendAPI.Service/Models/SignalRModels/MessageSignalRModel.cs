@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 
 namespace CloneMessengerBackendAPI.Service.Models.SignalRModels
 {
+    public class CreateConversationModel
+    {
+        public bool IsCreateUser { get; set; }
+        public ChatGroupViewModel Group { get; set; }
+        public ChatGroupDetailViewModel Conversation { get; set; }
+    }
     public class MessageSignalRModel
     {
         public Guid ChatGroupId { get; set; }

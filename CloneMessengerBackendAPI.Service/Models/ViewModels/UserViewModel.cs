@@ -19,6 +19,7 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
         public Guid Id { get; set; }
 
         public string DisplayName { get; set; }
+        public bool IsActive { get; set; }
 
     }
     public class UserModel
@@ -47,6 +48,7 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
     public class LoginResultModel
     {
         public Guid UserId { get; set; }
+        public string DisplayName { get; set; }
         public string Token { get; set; }
     }
     public class RegisterModel

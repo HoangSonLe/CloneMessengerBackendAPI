@@ -1,4 +1,6 @@
-﻿using CloneMessengerBackendAPI.Service.Models.ViewModels;
+﻿using CloneMessengerBackendAPI.Model.Model;
+using CloneMessengerBackendAPI.Service.Models.ViewModels;
+using LinqKit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,10 +20,31 @@ namespace CloneMessengerBackendAPI.Service.Helper
             return result;
         }
 
-        public static string CreateChatGroupName (List<UserViewModel> users)
+        public static string CreateChatGroupName (List<User> users,Guid? currentUserId)
         {
-            var s = string.Join(",",users.Select(i=> i.DisplayName).ToList());
+            var predicate = PredicateBuilder.New<User>(true);
+            if(currentUserId!= null)
+            {
+                //Check if a group => not remove current user name
+                if(users.Where(i=> i.Id != currentUserId).Count() <= 1)
+                {
+                    predicate = predicate.And(i=> i.Id != currentUserId);
+                }
+            }
+            var s = string.Join(",",users.Where(predicate).Select(i=> i.DisplayName).ToList());
             return s;
+        }
+        public static string CastMemberToUserIdForChat(List<Guid> ids)
+        {
+            return string.Join(",", ids.Select(i => i.ToString()).OrderBy(i => i));
+        }
+        public static string FormatDateTime(DateTime time)
+        {
+            return time.ToString("dd/MM/yyyy HH:mm");
+        }
+        public static string FormatDate(DateTime time)
+        {
+            return time.ToString("dd/MM/yyyy");
         }
     }
 }

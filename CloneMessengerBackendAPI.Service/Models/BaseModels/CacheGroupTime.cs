@@ -38,7 +38,7 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
         {
             var g = context.ChatGroups.Where(i=> i.Id == chatGroupId)
                                             .Include(i=> i.LastChatMessage)
-                                            .First();
+                                            .FirstOrDefault();
             var dateTime = DateTime.Now;
             var c = new CacheGroupModel()
             {
@@ -49,7 +49,7 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
                 KeyGroupByUserId = Guid.NewGuid(),
                 CurrentSendMessageUserId = userId,
             };
-            if (g.LastChatMessage != null)
+            if (g!= null && g.LastChatMessage != null)
             {
                 var l = g.LastChatMessage;
                 var date = context.ChatMessages.Where(i => i.ContinuityKeyByTime == l.ContinuityKeyByTime)

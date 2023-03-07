@@ -47,6 +47,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             ack.Data = new LoginResultModel()
             {
                 Token = token,
+                DisplayName = user.DisplayName,
                 UserId = user.Id,
             };
             return ack;

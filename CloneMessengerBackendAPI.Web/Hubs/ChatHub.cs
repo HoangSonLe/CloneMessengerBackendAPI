@@ -21,6 +21,7 @@ namespace CloneMessengerBackendAPI.Web.Hubs
     {
         void test(MessageSignalRModel model);
         Task sendMessage(MessageSignalRModel model);
+        Task sendMessageWithCreateConversation(CreateConversationModel model);
         Task updateMessageInfo(MessageInforModel model);
         Task updateStatusReadMessage(MessageStatus model);
     }
@@ -51,8 +52,16 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         public override Task OnConnected()
         {
             test();
-            string userId = GetUserIdClaim();
-            _connections.Add(userId, Context.ConnectionId);
+            try
+            {
+                string userId = GetUserIdClaim();
+                _connections.Add(userId, Context.ConnectionId);
+            }
+            catch (Exception ex)
+            {
+
+            }
+            
             return base.OnConnected();
         }
         public override Task OnReconnected()
@@ -78,18 +87,21 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         {
             var connectionIds = _connections.GetConnectionsByKeys(userIds.Select(i=>i.ToString()).ToList()).ToList();
             return connectionIds;
-        }
+        }  
         private string GetUserIdClaim()
         {
             var userId = string.Empty;
             var tmp = Context.Request.QueryString["token"];
             var current = Authentication.ParseToken(tmp);
             var identity = (ClaimsPrincipal)current;
-            var result = (new UserModel()).ParseClaim(identity);
-            userId = result.Id.ToString();
-            if (String.IsNullOrEmpty(userId))
+            if(identity != null)
             {
-                throw new Exception("UserId can not found");
+                var result = (new UserModel()).ParseClaim(identity);
+                userId = result.Id.ToString();
+                if (String.IsNullOrEmpty(userId))
+                {
+                    throw new Exception("UserId can not found");
+                }
             }
             return userId;
         }
@@ -103,11 +115,28 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         {
             Clients.All.test(new MessageSignalRModel() { });
         }
+        public List<Guid> GetUserOnlines(List<Guid> userIds)
+        {
+            var connectionIds = _connections.GetUserOnlines(userIds.Select(i => i.ToString()).ToList()).ToList();
+            return connectionIds;
+        }
+        /// <summary>
+        /// Update status READ
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="userIds"></param>
+        /// <returns></returns>
         public async Task UpdateStatusReadMessage(MessageStatus model, List<Guid> userIds)
         {   
             var conIds = GetConnectionIdsByUserIds(userIds);
             await ChatHubContext.Clients(conIds).updateStatusReadMessage(model);
         } 
+        /// <summary>
+        /// Update status Pending, Sent
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="userIds"></param>
+        /// <returns></returns>
         public async Task UpdateMessageInfo(MessageInforModel model, List<Guid> userIds)
         {   
             var conIds = GetConnectionIdsByUserIds(userIds);
@@ -118,6 +147,11 @@ namespace CloneMessengerBackendAPI.Web.Hubs
             var conIds = GetConnectionIdsByUserIds(userIds);
             ChatHubContext.All.test(new MessageSignalRModel() { });
             await ChatHubContext.Clients(conIds).sendMessage(model);
+        }
+        public async Task SendMessageWithCreateConversation(CreateConversationModel model, List<Guid> userIds)
+        {
+            var conIds = GetConnectionIdsByUserIds(userIds);
+            await ChatHubContext.Clients(conIds).sendMessageWithCreateConversation(model);
         }
         #endregion
     }

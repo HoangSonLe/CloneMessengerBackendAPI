@@ -28,6 +28,8 @@ namespace CloneMessengerBackendAPI.Model.Model
 
         public Guid? LastMessageId { get; set; }
 
+        public string UserIds { get; set; }
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ChatMember> ChatMembers { get; set; }

@@ -84,7 +84,13 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
                 IssuerSigningKey = securityKey,
             };
             SecurityToken validatedToken;
-            return jwtSecurityTokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
+            
+            try
+            {
+                return jwtSecurityTokenHandler.ValidateToken(jwt, validationParameters, out validatedToken);
+            }
+            catch(Exception ex) { }
+            return null;
         }
     }
 }

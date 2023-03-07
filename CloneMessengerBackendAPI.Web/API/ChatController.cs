@@ -32,6 +32,17 @@ namespace CloneMessengerBackendAPI.Web.API
             {
                 IsSuccess = true,
                 Data = new PageDefaultModel()
+                {
+                    ChatGroupDetailViewModel = new ChatGroupDetailViewModel()
+                    {
+                        IsTmp = true,
+                    },
+                    ChatGroupViewModel = new ChatGroupViewModel()
+                    {
+                        IsTmp = true,
+                        Name = "New message"
+                    }
+                }
             };
             return MapToIHttpActionResult(result);
         }
@@ -74,7 +85,7 @@ namespace CloneMessengerBackendAPI.Web.API
         [HttpPost]
         public async Task<IHttpActionResult> GetUserList(string searchValue)
         {
-            var result = await MessageServices.GetUserList(searchValue);
+            var result = await MessageServices.GetUserList(searchValue, GetCurrentUserModel().Id);
             return MapToIHttpActionResult(result);
         }
         [HttpPost]
@@ -82,6 +93,12 @@ namespace CloneMessengerBackendAPI.Web.API
         {
             post.CurrentUser = GetCurrentUserModel();
             var result = await MessageServices.CreateChatGroup(post);
+            return MapToIHttpActionResult(result);
+        }
+        [HttpPost]
+        public async Task<IHttpActionResult> SearchChatGroup(List<Guid> memberIds)
+        {
+            var result = await MessageServices.SearchChatGroup(memberIds, GetCurrentUserModel());
             return MapToIHttpActionResult(result);
         }
     }

@@ -12,6 +12,8 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
         public ChatMessagePaginationModel ChatMessagePaginationModel { get; set; }
         public ChatMessagePostData MessagePostData { get; set; }
         public CreateChatGroupModel CreateChatGroupModel { get; set; }
+        public ChatGroupViewModel ChatGroupViewModel { get; set; }
+        public ChatGroupDetailViewModel ChatGroupDetailViewModel { get; set; }
 
         public PageDefaultModel()
         {
@@ -19,6 +21,8 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
             ChatMessagePaginationModel = new ChatMessagePaginationModel();
             MessagePostData= new ChatMessagePostData();
             CreateChatGroupModel= new CreateChatGroupModel();
+            ChatGroupViewModel = new ChatGroupViewModel();
+            ChatGroupDetailViewModel = new ChatGroupDetailViewModel();
         }
     }
 }

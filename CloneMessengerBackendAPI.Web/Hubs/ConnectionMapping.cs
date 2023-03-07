@@ -1,10 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace BasicChat
 {
     public class ConnectionMapping<T>
     {
+    /// <summary>
+    /// Key : UserId
+    /// Data : List connectionIds do Hub cap case login nhieu cho
+    /// </summary>
         private readonly Dictionary<T, HashSet<string>> _connections =
             new Dictionary<T, HashSet<string>>();
 
@@ -49,6 +54,12 @@ namespace BasicChat
             List<string> connections = _connections.Where(i => keys.Contains(i.Key)).SelectMany(i=> i.Value).ToList();
 
             return connections;
+        }
+        public IEnumerable<Guid> GetUserOnlines(List<T> userIds)
+        {
+            List<Guid> userConnectingIds = _connections.Where(i => userIds.Contains(i.Key)).Select(i => Guid.Parse(i.Key.ToString())).ToList();
+
+            return userConnectingIds;
         }
         public void Remove(T key, string connectionId)
         {
