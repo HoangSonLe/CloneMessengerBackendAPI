@@ -22,6 +22,7 @@ namespace CloneMessengerBackendAPI.Model.Model
         public virtual DbSet<ChatMember> ChatMembers { get; set; }
         public virtual DbSet<ChatMessage> ChatMessages { get; set; }
         public virtual DbSet<ChatTextMessage> ChatTextMessages { get; set; }
+        public virtual DbSet<FileAttachment> FileAttachments { get; set; }  
         public virtual DbSet<UserLastReadMessage> UserLastReadMessages { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -63,6 +64,15 @@ namespace CloneMessengerBackendAPI.Model.Model
                 .WithMany(e => e.UserLastReadMessages)
                 .HasForeignKey(e => e.UserId)
                 .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<User>()
+                .HasOptional<FileAttachment>(e => e.AvatarFileAttachment)
+                //.WithOptionalDependent()
+                .WithMany().HasForeignKey(e => e.AvatarFileId).WillCascadeOnDelete(false);
+
+            //modelBuilder.Entity<User>()
+            //   .HasOptional<FileAttachment>(e => e.AvatarFileAttachment)
+            //   .WithMany().HasForeignKey(e=> e.AvatarFileId).WillCascadeOnDelete(false);
         }
     }
 }

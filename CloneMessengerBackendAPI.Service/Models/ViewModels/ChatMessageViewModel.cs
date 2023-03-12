@@ -27,7 +27,7 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
     public class ChatMessageGroupByUserViewModel
     {
         public Guid ContinuityKeyByUser { get; set; }
-        public bool IsMyMessage { get; set; }
+        public Guid UserId { get; set; }
         public List<ChatMessageViewModel> Messages { get; set; }
 
     }

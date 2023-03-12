@@ -16,7 +16,7 @@ namespace CloneMessengerBackendAPI.Model.Model
             ChatMessages = new HashSet<ChatMessage>();
             UserLastReadMessages = new HashSet<UserLastReadMessage>();
         }
-
+        [Key]
         public Guid Id { get; set; }
 
         [Column(TypeName = "varchar")]
@@ -27,7 +27,10 @@ namespace CloneMessengerBackendAPI.Model.Model
 
         public string DisplayName { get; set; }
 
+        [ForeignKey(nameof(AvatarFileAttachment))]
+        public Guid? AvatarFileId { get; set; }
 
+        public virtual FileAttachment AvatarFileAttachment { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ChatGroup> ChatGroups { get; set; }

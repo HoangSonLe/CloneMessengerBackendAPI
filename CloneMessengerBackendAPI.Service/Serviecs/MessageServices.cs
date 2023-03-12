@@ -16,6 +16,7 @@ using CloneMessengerBackendAPI.Model.ConfigureModel;
 using CloneMessengerBackendAPI.Service.Interfaces;
 using CloneMessengerBackendAPI.Service.Models.SignalRModels;
 using System.Xml.Linq;
+using CloneMessengerBackendAPI.Model.Helper;
 
 namespace CloneMessengerBackendAPI.Service.Serviecs
 {
@@ -194,11 +195,13 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     GroupMessageListByUser = groupUser.Select(k => new ChatMessageGroupByUserViewModel()
                     {
                         ContinuityKeyByUser = k.Key,
-                        IsMyMessage = k.First().CreatedBy == post.CurrentUser.Id,
+                        UserId = k.First().CreatedBy,
+                        //IsMyMessage = k.First().CreatedBy == post.CurrentUser.Id,
                         Messages = k.Select(j => MapChatMessageViewModel(j, new UserViewModel()
                         {
                             Id = j.User.Id,
-                            DisplayName = j.User.DisplayName
+                            DisplayName = j.User.DisplayName,
+                            AvatarFileId = j.User.AvatarFileId
                         })).OrderBy(j => j.CreatedDate).ToList()
                     }).OrderBy(j => j.Messages.First().CreatedDate).ToList()
                 };
@@ -351,7 +354,8 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             var mes = new ChatMessageGroupByUserViewModel()
             {
                 ContinuityKeyByUser = cm.ContinuityKeyByUser,
-                IsMyMessage = cm.CreatedBy == currentUserId,
+                UserId = cm.CreatedBy,
+                //IsMyMessage = cm.CreatedBy == currentUserId,
                 Messages = new List<ChatMessageViewModel>()
                 {
                     MapChatMessageViewModel(cm,new UserViewModel(post.CurrentUser),EMessageStatus.Sending)
@@ -380,7 +384,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             if (ack.IsSuccess == true)
             {
                 var memberIds = gr.ChatMembers.Where(j => j.IsRemoved == false && j.UserId != currentUserId).Select(i => i.UserId).ToList();
-                mes.IsMyMessage = false;
+                //mes.IsMyMessage = false;
                 mes.Messages.ForEach(i =>
                 {
                     i.MessageStatus = EMessageStatus.Sent;
@@ -670,6 +674,30 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             DbContext.ChatMessages.AddRange(messages);
             DbContext.SaveChanges();
             return users[0];
+        }
+        #endregion
+        #region FILES
+        public async Task<Acknowledgement<List<FileAttachment>>> InsertFiles(List<FileAttachment> files)
+        {
+            var ack = new Acknowledgement<List<FileAttachment>>();
+            var context = DbContext;
+            context.FileAttachments.AddRange(files);
+            await ack.TrySaveChangesAsync(context);
+            if (ack.IsSuccess == true)
+            {
+                ack.Data = files.Select(i => i.ToEmptyData()).ToList();
+                return ack;
+            }
+            return ack;
+        }
+        public async Task<Acknowledgement<List<FileAttachment>>> GetFiles(List<Guid> fileIds)
+        {
+            var ack = new Acknowledgement<List<FileAttachment>>();
+            var context = DbContext;
+            var files =await context.FileAttachments.Where(i=> fileIds.Contains(i.Id)).ToListAsync();
+            ack.IsSuccess = true;
+            ack.Data = files;
+            return ack;
         }
         #endregion
     }

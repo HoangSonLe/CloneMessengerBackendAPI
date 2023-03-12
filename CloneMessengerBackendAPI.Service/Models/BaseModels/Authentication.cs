@@ -66,6 +66,10 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
         }
         public static ClaimsPrincipal ParseToken(string jwt)
         {
+            if (string.IsNullOrEmpty(jwt) || string.IsNullOrWhiteSpace(jwt) || jwt == "undefined")
+            {
+                return null;
+            }
             JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             if (!((jwtSecurityTokenHandler).ReadToken(jwt) is JwtSecurityToken))
             {

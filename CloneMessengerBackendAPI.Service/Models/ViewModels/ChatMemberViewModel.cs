@@ -12,5 +12,7 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
         public string DisplayName { get; set; }
         public bool IsOnline { get; set; }
         public string AddByName { get; set; }
+        public Guid? AvatarFileId { get; set; }
+        public string AvatarFileSrc { get; set; }
     }
 }

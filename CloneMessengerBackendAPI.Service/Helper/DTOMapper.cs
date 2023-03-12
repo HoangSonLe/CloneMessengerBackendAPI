@@ -46,7 +46,8 @@ namespace CloneMessengerBackendAPI.Service.Helper
                     UserId = m.Id,
                     DisplayName = m.DisplayName,
                     IsOnline = userOnlineIds.Contains(m.Id),
-                    AddByName = addBy.DisplayName
+                    AddByName = addBy.DisplayName,
+                    AvatarFileId = m.AvatarFileId
                 };
                 return t;
             }).ToList();
@@ -63,6 +64,7 @@ namespace CloneMessengerBackendAPI.Service.Helper
         public static void MapDTOUser(this UserViewModel vm, User u)
         {
             vm.Id = u.Id;
+            vm.AvatarFileId = u.AvatarFileId;
             vm.DisplayName = u.DisplayName;
         }
 

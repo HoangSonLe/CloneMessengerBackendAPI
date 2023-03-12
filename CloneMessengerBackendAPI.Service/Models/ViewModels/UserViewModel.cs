@@ -8,18 +8,17 @@ using System.Threading.Tasks;
 
 namespace CloneMessengerBackendAPI.Service.Models.ViewModels
 {
-    public class UserViewModel
+    public class UserViewModel : UserModel
     {
         public UserViewModel() { }
         public UserViewModel(UserModel u)
         {
             Id = u.Id;
+            AvatarFileId = u.AvatarFileId;
             DisplayName = u.DisplayName;
         }
-        public Guid Id { get; set; }
-
-        public string DisplayName { get; set; }
         public bool IsActive { get; set; }
+      
 
     }
     public class UserModel
@@ -28,6 +27,8 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
         public string Username { get; set; }
         public string Password { get; set; }
         public string DisplayName { get; set; }
+        public Guid? AvatarFileId { get; set; }
+        public string AvatarFileSrc { get; set; }
         public UserModel ParseClaim(ClaimsPrincipal claimsPrincipal)
         {
             var result = new UserModel()
@@ -45,16 +46,18 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
         public string UserName { get; set; }
         public string Password { get; set; }    
     }
+    public class RegisterModel : LoginModel
+    {
+        public string DisplayName { get; set;}
+        public Guid AvatarFileId { get; set; }
+
+    }
     public class LoginResultModel
     {
         public Guid UserId { get; set; }
         public string DisplayName { get; set; }
         public string Token { get; set; }
-    }
-    public class RegisterModel
-    {
-        public string UserName { get; set; }
-        public string Password { get; set; }
-        public string DisplayName { get; set; }
+        public Guid? AvatarFileId { get; set; }
+        public string AvatarSrc { get; set; }
     }
 }

@@ -25,7 +25,7 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         Task updateMessageInfo(MessageInforModel model);
         Task updateStatusReadMessage(MessageStatus model);
     }
-    public class ChatHub : Hub<IChatHub>,IChatHubService
+    public class ChatHub : Hub<IChatHub>, IChatHubService
     {
         private static ChatHub hub;
         //public static ChatHub Default
@@ -61,7 +61,7 @@ namespace CloneMessengerBackendAPI.Web.Hubs
             {
 
             }
-            
+
             return base.OnConnected();
         }
         public override Task OnReconnected()
@@ -72,6 +72,7 @@ namespace CloneMessengerBackendAPI.Web.Hubs
             {
                 _connections.Add(userId, Context.ConnectionId);
             }
+            UpdateOnline(userId);
             return base.OnReconnected();
         }
         public override Task OnDisconnected(bool stopCalled)
@@ -85,16 +86,16 @@ namespace CloneMessengerBackendAPI.Web.Hubs
 
         private List<string> GetConnectionIdsByUserIds(List<Guid> userIds)
         {
-            var connectionIds = _connections.GetConnectionsByKeys(userIds.Select(i=>i.ToString()).ToList()).ToList();
+            var connectionIds = _connections.GetConnectionsByKeys(userIds.Select(i => i.ToString()).ToList()).ToList();
             return connectionIds;
-        }  
+        }
         private string GetUserIdClaim()
         {
             var userId = string.Empty;
             var tmp = Context.Request.QueryString["token"];
             var current = Authentication.ParseToken(tmp);
             var identity = (ClaimsPrincipal)current;
-            if(identity != null)
+            if (identity != null)
             {
                 var result = (new UserModel()).ParseClaim(identity);
                 userId = result.Id.ToString();
@@ -109,7 +110,7 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         #region PUBLIC
         private void UpdateOnline(string userId)
         {
-
+            //TODO
         }
         public void test()
         {
@@ -118,6 +119,13 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         public List<Guid> GetUserOnlines(List<Guid> userIds)
         {
             var connectionIds = _connections.GetUserOnlines(userIds.Select(i => i.ToString()).ToList()).ToList();
+
+            return connectionIds;
+        }
+        public List<Guid> GetAllUserOnlines()
+        {
+            var connectionIds = _connections.GetAllUserOnlines().ToList();
+
             return connectionIds;
         }
         /// <summary>
@@ -127,10 +135,10 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         /// <param name="userIds"></param>
         /// <returns></returns>
         public async Task UpdateStatusReadMessage(MessageStatus model, List<Guid> userIds)
-        {   
+        {
             var conIds = GetConnectionIdsByUserIds(userIds);
             await ChatHubContext.Clients(conIds).updateStatusReadMessage(model);
-        } 
+        }
         /// <summary>
         /// Update status Pending, Sent
         /// </summary>
@@ -138,7 +146,7 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         /// <param name="userIds"></param>
         /// <returns></returns>
         public async Task UpdateMessageInfo(MessageInforModel model, List<Guid> userIds)
-        {   
+        {
             var conIds = GetConnectionIdsByUserIds(userIds);
             await ChatHubContext.Clients(conIds).updateMessageInfo(model);
         }

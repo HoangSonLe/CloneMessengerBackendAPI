@@ -61,6 +61,12 @@ namespace BasicChat
 
             return userConnectingIds;
         }
+        public IEnumerable<Guid> GetAllUserOnlines()
+        {
+            List<Guid> userConnectingIds = _connections.Select(i => Guid.Parse(i.Key.ToString())).ToList();
+
+            return userConnectingIds;
+        }
         public void Remove(T key, string connectionId)
         {
             lock (_connections)

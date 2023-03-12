@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfigureModel\DefaultConfig.cs" />
+    <Compile Include="Helper\FileHelper.cs" />
     <Compile Include="Migrations\202212271008199_InitCreate.cs" />
     <Compile Include="Migrations\202212271008199_InitCreate.designer.cs">
       <DependentUpon>202212271008199_InitCreate.cs</DependentUpon>
@@ -76,8 +77,13 @@
     <Compile Include="Migrations\202303051440047_AddUserIdsChatGroup.designer.cs">
       <DependentUpon>202303051440047_AddUserIdsChatGroup.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202303110909498_AddFileStructureDB.cs" />
+    <Compile Include="Migrations\202303110909498_AddFileStructureDB.designer.cs">
+      <DependentUpon>202303110909498_AddFileStructureDB.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Model\ChatFileAttachment.cs" />
+    <Compile Include="Model\FileAttachment.cs" />
     <Compile Include="Model\User.cs" />
     <Compile Include="Model\ChatGroup.cs" />
     <Compile Include="Model\ChatMember.cs" />
@@ -85,6 +91,7 @@
     <Compile Include="Model\ChatTextMessage.cs" />
     <Compile Include="Model\CloneMessengerDbContext.cs" />
     <Compile Include="Model\UserLastReadMessage.cs" />
+    <Compile Include="Partials\FileAttachment_Partial.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +110,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202303051440047_AddUserIdsChatGroup.resx">
       <DependentUpon>202303051440047_AddUserIdsChatGroup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202303110909498_AddFileStructureDB.resx">
+      <DependentUpon>202303110909498_AddFileStructureDB.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

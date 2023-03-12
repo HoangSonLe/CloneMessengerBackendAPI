@@ -18,4 +18,10 @@ namespace CloneMessengerBackendAPI.Service.Models
         Sent = 2,
         Read = 3
     }
+    public enum EFileType
+    {
+        Undefine = 0, 
+        Image = 1,
+        Others = 2,
+    }
 }

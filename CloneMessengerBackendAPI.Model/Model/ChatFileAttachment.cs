@@ -16,8 +16,10 @@ namespace CloneMessengerBackendAPI.Model.Model
 
         [Key]
         [Column(Order = 1)]
+        [ForeignKey(nameof(FileAttachment))]
         public Guid FileId { get; set; }
 
         public virtual ChatMessage ChatMessage { get; set; }
+        public virtual FileAttachment FileAttachment { get; set; }
     }
 }

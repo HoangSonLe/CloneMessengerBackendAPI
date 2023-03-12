@@ -11,5 +11,7 @@ namespace CloneMessengerBackendAPI.Service.Interfaces
     public interface IUserService : IBasicService
     {
         Task<Acknowledgement<LoginResultModel>> Login(LoginModel post);
+        Task<Acknowledgement<LoginResultModel>> Register(RegisterModel post);
+        Task<Acknowledgement<List<UserViewModel>>> GetOnlineUserList(Guid currentUserId);
     }
 }

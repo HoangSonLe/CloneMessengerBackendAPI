@@ -15,5 +15,6 @@ namespace CloneMessengerBackendAPI.Service.Interfaces
         Task UpdateMessageInfo(MessageInforModel model, List<Guid> userIds);
         Task UpdateStatusReadMessage(MessageStatus model, List<Guid> userIds);
         List<Guid> GetUserOnlines(List<Guid> userIds);
+        List<Guid> GetAllUserOnlines();
     }
 }
