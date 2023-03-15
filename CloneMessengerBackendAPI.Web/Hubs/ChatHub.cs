@@ -1,4 +1,6 @@
 ﻿using BasicChat;
+using CloneMessengerBackendAPI.Model.Model;
+using CloneMessengerBackendAPI.Service.Helper;
 using CloneMessengerBackendAPI.Service.Interfaces;
 using CloneMessengerBackendAPI.Service.Models.BaseModels;
 using CloneMessengerBackendAPI.Service.Models.SignalRModels;
@@ -24,6 +26,9 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         Task sendMessageWithCreateConversation(CreateConversationModel model);
         Task updateMessageInfo(MessageInforModel model);
         Task updateStatusReadMessage(MessageStatus model);
+        Task updateUser(UserViewModel model);
+        void updateContactList();
+        void logout();
     }
     public class ChatHub : Hub<IChatHub>, IChatHubService
     {
@@ -56,11 +61,18 @@ namespace CloneMessengerBackendAPI.Web.Hubs
             {
                 string userId = GetUserIdClaim();
                 _connections.Add(userId, Context.ConnectionId);
+                var uId = Guid.Empty;
+                Guid.TryParse(userId, out uId);
+                if (uId != Guid.Empty)
+                {
+                    //UpdateContactList();
+                    UpdateUser(new UserViewModel() { Id = Guid.Parse(userId), IsOnline = true }, uId.ToSingleList());
+                }
             }
             catch (Exception ex)
             {
-
             }
+
 
             return base.OnConnected();
         }
@@ -72,14 +84,24 @@ namespace CloneMessengerBackendAPI.Web.Hubs
             {
                 _connections.Add(userId, Context.ConnectionId);
             }
-            UpdateOnline(userId);
+            var uId = Guid.Empty;
+            Guid.TryParse(userId, out uId);
+            if (uId != Guid.Empty)
+            {
+                UpdateUser(new UserViewModel() { Id = Guid.Parse(userId), IsOnline = true }, uId.ToSingleList());
+            }
             return base.OnReconnected();
         }
         public override Task OnDisconnected(bool stopCalled)
         {
             string userId = GetUserIdClaim();
             _connections.Remove(userId, Context.ConnectionId);
-            UpdateOnline(userId);
+            var uId = Guid.Empty;
+            Guid.TryParse(userId,out uId);
+            if(uId!= Guid.Empty)
+            {
+                UpdateUser(new UserViewModel() { Id = Guid.Parse(userId),IsOnline = false},uId.ToSingleList());
+            }
             return base.OnDisconnected(stopCalled);
         }
         #region PRIVATE
@@ -108,9 +130,15 @@ namespace CloneMessengerBackendAPI.Web.Hubs
         }
         #endregion
         #region PUBLIC
-        private void UpdateOnline(string userId)
+
+        public void UpdateContactList()
         {
-            //TODO
+            Clients.All.updateContactList();
+        }
+        public void UpdateUser(UserViewModel model, List<Guid> userIds)
+        {
+            //var conIds = GetConnectionIdsByUserIds(userIds);
+            Clients.All.updateUser(model);
         }
         public void test()
         {

@@ -33,7 +33,7 @@ namespace CloneMessengerBackendAPI.Service.Models.SignalRModels
         public DateTime ReadTime { get; set; }
         public DateTime LastMessageCreatedDate { get; set; }
         public Guid UserId { get; set; }
-        public string UserName { get; set; }
+        public string DisplayName { get; set; }
     }
     public class MessageInforModel
     {

@@ -9,8 +9,9 @@ namespace CloneMessengerBackendAPI.Model.ConfigureModel
     public static class DefaultConfig
     {
         public static readonly int DefaultPageSize = 20;
-        public static readonly int DefaultHourMessage = 60;
-        public static readonly TimeSpan DefaultHourMessageInGroupMessage = new TimeSpan(DefaultHourMessage, 0, 0);
+        public static readonly int DefaultHourMessage = 1;
+        public static readonly int DefaultMinuteMessage = 30;
+        public static readonly TimeSpan DefaultHourMessageInGroupMessage = new TimeSpan(0, DefaultMinuteMessage, 0);
     }
     public class Config
     {

@@ -29,6 +29,13 @@ namespace CloneMessengerBackendAPI.Web.API
         public ChatController(IUserService userService, IMessageService messageService) : base(userService, messageService)
         {
         }
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IHttpActionResult> Test()
+        {
+            var result = await MessageServices.Test();
+            return MapToIHttpActionResult(result);
+        }
 
         [HttpGet]
         public async Task<IHttpActionResult> GetPageDefaultModel()

@@ -1,4 +1,5 @@
 ﻿using CloneMessengerBackendAPI.Service.Models.SignalRModels;
+using CloneMessengerBackendAPI.Service.Models.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,9 @@ namespace CloneMessengerBackendAPI.Service.Interfaces
         Task UpdateMessageInfo(MessageInforModel model, List<Guid> userIds);
         Task UpdateStatusReadMessage(MessageStatus model, List<Guid> userIds);
         List<Guid> GetUserOnlines(List<Guid> userIds);
+        void UpdateUser(UserViewModel model, List<Guid> userIds);
+        void UpdateContactList();
+
         List<Guid> GetAllUserOnlines();
     }
 }

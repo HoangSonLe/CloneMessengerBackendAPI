@@ -21,15 +21,15 @@ namespace CloneMessengerBackendAPI.Service.Helper
             vm.CreatedBy = g.CreatedBy;
             vm.CreatedDate = g.CreatedDate;
             vm.LastMessageId = g.LastMessageId;
+            vm.ListMembers = MapChatMemberViewModelList(g.ChatMembers.ToList(), hub);
             if (lm != null)
             {
-                var u = g.ChatMembers.First(i=> i.UserId == lm.CreatedBy).User;
+                var u = g.ChatMembers.First(i => i.UserId == lm.CreatedBy).User;
                 vm.LastMessage = new ChatMessageViewModel()
                 {
                     CreatedByName = u.DisplayName,
                     MessageStatus = EMessageStatus.Sent,
                 };
-                vm.ListMembers = MapChatMemberViewModelList(g.ChatMembers.ToList(), hub);
                 vm.LastMessage.MapDTOChatMessage(lm);
             }
         }

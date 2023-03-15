@@ -17,6 +17,7 @@ using CloneMessengerBackendAPI.Service.Interfaces;
 using CloneMessengerBackendAPI.Service.Models.SignalRModels;
 using System.Xml.Linq;
 using CloneMessengerBackendAPI.Model.Helper;
+using System.Web.Http.Results;
 
 namespace CloneMessengerBackendAPI.Service.Serviecs
 {
@@ -26,6 +27,20 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         {
         }
         #region API
+        public async Task<Acknowledgement<List<UserModel>>> Test()
+        {
+            var context = DbContext;
+            var ack = new Acknowledgement<List<UserModel>>();
+            var db = context.Users.ToList();
+            ack.Data = db.Select(i => new UserModel()
+            {
+                Id = i.Id,
+                DisplayName = i.DisplayName
+            }).ToList();
+            ack.IsSuccess = true;
+            return ack;
+        }
+
         /// <summary>
         /// Get list of chat group
         /// </summary>
@@ -81,6 +96,8 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 {
                     group.MessageStatus = await GetMessageStatus(g.ChatGroup.Id);
                 }
+                //FEATURE UPDATE WHEN HAS EDIT CHATGROUPNAME
+                group.Name = StringHelper.CreateChatGroupName(gr.ChatMembers.Select(i => i.User).ToList(), currentUserId, false);
                 listChatGroup.Add(group);
             }
             var nextSkip = post.Skip + listChatGroup.Count();
@@ -231,7 +248,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 ReadTime = i.Time,
                 LastMessageCreatedDate = i.ChatMessage.CreatedDate,
                 UserId = i.UserId,
-                UserName = i.User.DisplayName,
+                DisplayName = i.User.DisplayName,
             }).ToList();
             var result = new MessageStatus()
             {
@@ -286,7 +303,11 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     GroupId = queryG.Id,
                     Text = string.Empty,
                 },
+                CreatedBy = queryG.CreatedBy,
+                CreatedDate = queryG.CreatedDate,
             };
+            //FEATURE UPDATE WHEN HAS EDIT CHATGROUPNAME
+            result.Name = StringHelper.CreateChatGroupName(queryG.ChatMembers.Select(i => i.User).ToList(), post.CurrentUser.Id, false);
             result.MessageStatus = await GetMessageStatus(queryG.Id);
 
 
@@ -347,7 +368,8 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 {
                     ChatGroupId = post.GroupId,
                     UserId = currentUserId,
-                    Time = DateTime.Now
+                    Time = DateTime.Now,
+                    LastReadMessageId = cm.Id
                 });
             }
             //Call SignalR SendMessage
@@ -436,7 +458,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 var u = new UserViewModel();
                 u.MapDTOUser(i);
 
-                u.IsActive = onlines.Contains(i.Id);
+                u.IsOnline = onlines.Contains(i.Id);
                 return u;
             }).Take(50).ToList();
 
@@ -456,7 +478,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             var context = DbContext;
             var newChatGroupId = Guid.NewGuid();
             var cacheGroup = CacheMessage.GetOrCreateCacheGroup(context, newChatGroupId, post.CurrentUser.Id);
-            
+
             var currentUserId = post.CurrentUser.Id;
             var userIds = post.UserIds;
             userIds.Add(currentUserId);
@@ -480,7 +502,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             {
                 Id = newChatGroupId,
                 CreatedBy = currentUserId,
-                Name = StringHelper.CreateChatGroupName(users, currentUserId),
+                Name = StringHelper.CreateChatGroupName(users, currentUserId, true),
                 UserIds = StringHelper.CastMemberToUserIdForChat(users.Select(i => i.Id).ToList()),
                 CreatedDate = DateTime.Now,
                 ChatMembers = users.Select(i => new ChatMember()
@@ -551,7 +573,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             memberIds.Add(currentUser.Id);
             var s = StringHelper.CastMemberToUserIdForChat(memberIds);
             var group = context.ChatGroups.FirstOrDefault(i => i.UserIds == s);
-            
+
             if (group != null)
             {
                 ack = await GetChatGroupDetail(new ChatMessagePaginationModel()
@@ -563,7 +585,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             }
             else
             {
-              
+
                 ack = new Acknowledgement<ChatGroupDetailViewModel>()
                 {
                     IsSuccess = true,
@@ -578,7 +600,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     }
                 };
             }
-            var name = StringHelper.CreateChatGroupName(users, currentUser.Id);
+            var name = StringHelper.CreateChatGroupName(users, currentUser.Id, true);
             var cName = name.Count() > 0 ? "to" : "";
             ack.Data.Name = $"New message {cName} {name}";
             return ack;
@@ -694,7 +716,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
         {
             var ack = new Acknowledgement<List<FileAttachment>>();
             var context = DbContext;
-            var files =await context.FileAttachments.Where(i=> fileIds.Contains(i.Id)).ToListAsync();
+            var files = await context.FileAttachments.Where(i => fileIds.Contains(i.Id)).ToListAsync();
             ack.IsSuccess = true;
             ack.Data = files;
             return ack;

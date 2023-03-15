@@ -71,10 +71,18 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
                 return null;
             }
             JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            if (!((jwtSecurityTokenHandler).ReadToken(jwt) is JwtSecurityToken))
+            try
+            {
+                if (!((jwtSecurityTokenHandler).ReadToken(jwt) is JwtSecurityToken))
+                {
+                    return null;
+                }
+            }
+            catch(Exception ex)
             {
                 return null;
             }
+            
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Convert.ToString(ConfigurationManager.AppSettings["config:JwtKey"])));
 
             TokenValidationParameters validationParameters = new TokenValidationParameters

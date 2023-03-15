@@ -121,7 +121,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             {
                 var u = new UserViewModel();
                 u.MapDTOUser(i);
-                u.IsActive = true;
+                u.IsOnline = true;
                 return u;
             }).Take(50).ToList();
 

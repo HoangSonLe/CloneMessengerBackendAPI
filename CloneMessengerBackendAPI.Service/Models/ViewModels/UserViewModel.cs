@@ -17,7 +17,7 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
             AvatarFileId = u.AvatarFileId;
             DisplayName = u.DisplayName;
         }
-        public bool IsActive { get; set; }
+        public bool IsOnline { get; set; }
       
 
     }

@@ -4,6 +4,7 @@ using CloneMessengerBackendAPI.Service.Models.ViewModels;
 using CloneMessengerBackendAPI.Service.Serviecs;
 using CloneMessengerBackendAPI.Web.Hubs;
 using Microsoft.AspNet.SignalR.Hubs;
+using Microsoft.Owin.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,13 +12,21 @@ using System.Net;
 using System.Security.Claims;
 using System.Web;
 using System.Web.Http;
-
+using System.Net.Http;
 namespace CloneMessengerBackendAPI.Web.API
 {
     public class BaseAPIController : ApiController
     {
         private readonly IMessageService messageService;
         private readonly IUserService userService;
+        protected IAuthenticationManager AuthenticationManager
+        {
+            get
+            {
+                var o = OwinHttpRequestMessageExtensions.GetOwinContext(this.Request);
+                return o.Authentication;
+            }
+        }
         public BaseAPIController(IUserService userService, IMessageService messageService)
         {
             this.messageService = messageService;
@@ -27,7 +36,7 @@ namespace CloneMessengerBackendAPI.Web.API
         {
             if (ack == null)
             {
-                return Content(HttpStatusCode.NotFound, "ReturnData is null");
+                return Content(HttpStatusCode.NotFound, new List<string>() { "ReturnData is null" });
             }
             if (ack.IsSuccess == false)
             {
@@ -39,7 +48,7 @@ namespace CloneMessengerBackendAPI.Web.API
         {
             if(ack == null)
             {
-                return Content(HttpStatusCode.NotFound,"ReturnData is null");
+                return Content(HttpStatusCode.NotFound, new List<string>() { "ReturnData is null" });
             }
             if(ack.IsSuccess == false)
             {

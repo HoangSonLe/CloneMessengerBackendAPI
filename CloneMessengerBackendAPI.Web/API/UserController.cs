@@ -1,4 +1,5 @@
-﻿using CloneMessengerBackendAPI.Service.Interfaces;
+﻿using CloneMessengerBackendAPI.Service.Helper;
+using CloneMessengerBackendAPI.Service.Interfaces;
 using CloneMessengerBackendAPI.Service.Models.BaseModels;
 using CloneMessengerBackendAPI.Service.Models.ViewModels;
 using EHealth.Web.Helper;
@@ -6,6 +7,7 @@ using Facebook;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Policy;
@@ -35,7 +37,16 @@ namespace CloneMessengerBackendAPI.Web.API
                 result.Data.AvatarSrc = APIHelper.GetFileUrl(result.Data.AvatarFileId);
             }
             return MapToIHttpActionResult(result);
-        }  
+        }
+        [HttpGet]
+        public IHttpActionResult Logout()
+        {
+            AuthenticationManager.SignOut();
+            var currentUserId = CurrentUserId();
+            ChatHubContext.Clients(currentUserId.ToString().ToSingleList()).logout();
+            return Ok();
+        }
+
         [AllowAnonymous]
         [HttpPost]
         // GET: User

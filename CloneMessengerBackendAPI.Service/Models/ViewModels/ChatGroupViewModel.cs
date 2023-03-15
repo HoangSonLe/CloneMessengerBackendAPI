@@ -21,14 +21,12 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
 
         public DateTime CreatedDate { get; set; }
 
-        public bool IsGroup { get; }
         public bool IsRemoved { get; set; }
         public bool IsTmp { get; set; }
         public List<ChatMemberViewModel> ListMembers { get; set; }
         public BaseChatGroupView()
         {
             ListMembers = new List<ChatMemberViewModel>();
-            IsGroup = ListMembers.Count() > 2;
         }
     }
     public class ChatGroupViewModel : BaseChatGroupView

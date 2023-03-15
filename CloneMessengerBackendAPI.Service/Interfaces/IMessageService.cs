@@ -13,6 +13,7 @@ namespace CloneMessengerBackendAPI.Service.Interfaces
     public interface IMessageService : IBasicService
     {
         #region Messages
+        Task<Acknowledgement<List<UserModel>>> Test();
         Task<Acknowledgement<PaginationModel<List<ChatGroupViewModel>>>> GetChatGroups(PaginationModel post);
         Task<Acknowledgement<ChatGroupDetailViewModel>> GetChatGroupDetail(ChatMessagePaginationModel post);
         Task<Acknowledgement> SendMessage(ChatMessagePostData post);
