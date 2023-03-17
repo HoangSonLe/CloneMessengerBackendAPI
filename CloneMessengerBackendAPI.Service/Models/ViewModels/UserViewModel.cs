@@ -29,6 +29,7 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
         public string DisplayName { get; set; }
         public Guid? AvatarFileId { get; set; }
         public string AvatarFileSrc { get; set; }
+        public DateTime CreatedDate { get; set; }
         public UserModel ParseClaim(ClaimsPrincipal claimsPrincipal)
         {
             var result = new UserModel()
@@ -49,7 +50,7 @@ namespace CloneMessengerBackendAPI.Service.Models.ViewModels
     public class RegisterModel : LoginModel
     {
         public string DisplayName { get; set;}
-        public Guid AvatarFileId { get; set; }
+        public Guid? AvatarFileId { get; set; }
 
     }
     public class LoginResultModel

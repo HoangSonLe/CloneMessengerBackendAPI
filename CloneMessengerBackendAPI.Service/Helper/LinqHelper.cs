@@ -24,6 +24,10 @@ namespace CloneMessengerBackendAPI.Service.Helper
                 ack.ExtractMessage(ex);
             }
         }
+        public static DateTime GetDateTimeNow()
+        {
+            return DateTime.Now.ToUniversalTime();
+        }
         public static List<T> ToSingleList<T>(this T data)
         {
             return new List<T> { data };

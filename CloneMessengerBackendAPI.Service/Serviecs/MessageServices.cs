@@ -35,7 +35,8 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             ack.Data = db.Select(i => new UserModel()
             {
                 Id = i.Id,
-                DisplayName = i.DisplayName
+                DisplayName = i.DisplayName,
+                CreatedDate = i.CreatedDate
             }).ToList();
             ack.IsSuccess = true;
             return ack;
@@ -142,7 +143,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     {
                         ChatGroupId = chatGroupId,
                         LastReadMessageId = lastMessage.Id,
-                        Time = DateTime.Now,
+                        Time = LinqHelper.GetDateTimeNow(),
                         UserId = currentUserId
                     };
                     context.UserLastReadMessages.Add(userLastRead);
@@ -157,7 +158,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     else
                     {
                         dbData.LastReadMessageId = lastMessage.Id;
-                        dbData.Time = DateTime.Now;
+                        dbData.Time = LinqHelper.GetDateTimeNow();
                     }
                 }
                 ack.IsSuccess = true;
@@ -351,7 +352,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     Text = post.Text
                 } : null,
                 CreatedBy = currentUserId,
-                CreatedDate = DateTime.Now,
+                CreatedDate = LinqHelper.GetDateTimeNow(),
             };
             gr.LastMessageId = cm.Id;
             gr.LastChatMessage = cm;
@@ -359,7 +360,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             var ulrm = gr.UserLastReadMessages.Where(i => i.UserId == currentUserId).FirstOrDefault();
             if (ulrm != null)
             {
-                ulrm.Time = DateTime.Now;
+                ulrm.Time = LinqHelper.GetDateTimeNow();
                 ulrm.LastReadMessageId = cm.Id;
             }
             else
@@ -368,7 +369,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 {
                     ChatGroupId = post.GroupId,
                     UserId = currentUserId,
-                    Time = DateTime.Now,
+                    Time = LinqHelper.GetDateTimeNow(),
                     LastReadMessageId = cm.Id
                 });
             }
@@ -486,7 +487,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
             var message = new ChatMessage()
             {
                 Id = Guid.NewGuid(),
-                CreatedDate = DateTime.Now,
+                CreatedDate = LinqHelper.GetDateTimeNow(),
                 GroupId = newChatGroupId,
                 IsSystem = false,
                 ContinuityKeyByTime = cacheGroup.KeyGroupByTime,
@@ -504,11 +505,11 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 CreatedBy = currentUserId,
                 Name = StringHelper.CreateChatGroupName(users, currentUserId, true),
                 UserIds = StringHelper.CastMemberToUserIdForChat(users.Select(i => i.Id).ToList()),
-                CreatedDate = DateTime.Now,
+                CreatedDate = LinqHelper.GetDateTimeNow(),
                 ChatMembers = users.Select(i => new ChatMember()
                 {
                     AddedBy = currentUserId,
-                    AddedDate = DateTime.Now,
+                    AddedDate = LinqHelper.GetDateTimeNow(),
                     UserId = i.Id
                 }).ToList(),
                 //ChatMessages = new List<ChatMessage>() { message }
@@ -521,7 +522,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     new UserLastReadMessage()
                     {
                         LastReadMessageId = message.Id,
-                        Time = DateTime.Now,
+                        Time = LinqHelper.GetDateTimeNow(),
                         UserId = currentUserId,
                     }
                 };
@@ -581,7 +582,6 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     ChatGroupId = group.Id,
                     CurrentUser = currentUser
                 });
-                ack.Data.IsTmp = true;
             }
             else
             {
@@ -625,7 +625,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 Id =  Guid.NewGuid(),
                 UserName = "Hoang Huy 1",
                 MD5Password = StringHelper.ToMD5Byte("1234"),
-                CreatedDate = DateTime.Now,
+                CreatedDate = LinqHelper.GetDateTimeNow(),
                 DisplayName = $"Hoang Huy {(new Random()).Next(1, 10)}"
             },
                new User()
@@ -633,7 +633,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 Id =  Guid.NewGuid(),
                 UserName = "Hoang Huy 2",
                 MD5Password = StringHelper.ToMD5Byte("1234"),
-                CreatedDate = DateTime.Now,
+                CreatedDate = LinqHelper.GetDateTimeNow(),
                 DisplayName = $"Hoang Huy {(new Random()).Next(1, 10)}"
             }
             }
@@ -643,7 +643,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 Id = Guid.NewGuid(),
                 Name = "Test",
                 CreatedBy = users[0].Id,
-                CreatedDate = DateTime.Now,
+                CreatedDate = LinqHelper.GetDateTimeNow(),
             };
             var chatMembers = new List<ChatMember>()
             {
@@ -652,14 +652,14 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     ChatGroupId = chatGroup.Id,
                     UserId = users[0].Id,
                     AddedBy = users[0].Id,
-                    AddedDate = DateTime.Now,
+                    AddedDate = LinqHelper.GetDateTimeNow(),
                 },
                 new ChatMember()
                 {
                     ChatGroupId = chatGroup.Id,
                     UserId = users[1].Id,
                     AddedBy = users[0].Id,
-                    AddedDate = DateTime.Now,
+                    AddedDate = LinqHelper.GetDateTimeNow(),
                 }
             };
 
@@ -670,7 +670,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 Id = Guid.NewGuid(),
                 GroupId = chatGroup.Id,
                 CreatedBy = users[0].Id,
-                CreatedDate = DateTime.Now,
+                CreatedDate = LinqHelper.GetDateTimeNow(),
                 IsSystem = false,
                 ChatTextMessage = new ChatTextMessage()
                 {
@@ -682,7 +682,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                     Id = Guid.NewGuid(),
                     GroupId = chatGroup.Id,
                     CreatedBy = users[1].Id,
-                    CreatedDate = DateTime.Now,
+                    CreatedDate = LinqHelper.GetDateTimeNow(),
                     IsSystem = false,
                     ChatTextMessage = new ChatTextMessage()
                     {

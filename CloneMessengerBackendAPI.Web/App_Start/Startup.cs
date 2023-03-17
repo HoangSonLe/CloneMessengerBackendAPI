@@ -34,11 +34,13 @@ namespace CloneMessengerBackendAPI.Web.App_Start
                     // JSONP requests are insecure but some older browsers (and some
                     // versions of IE) require JSONP to work cross domain
                     // EnableJSONP = true
+                    EnableJSONP = true,
+                    EnableJavaScriptProxies = true,
+                    EnableDetailedErrors = true
                 };
                 // Run the SignalR pipeline. We're not using MapSignalR
                 // since this branch already runs under the "/signalr"
                 // path.
-                hubConfiguration.EnableDetailedErrors = true;
                 map.RunSignalR(hubConfiguration);
             });
         }

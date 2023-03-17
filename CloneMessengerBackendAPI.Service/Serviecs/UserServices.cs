@@ -80,7 +80,7 @@ namespace CloneMessengerBackendAPI.Service.Serviecs
                 UserName = userName,
                 DisplayName = post.DisplayName,
                 MD5Password = md5Pass,
-                CreatedDate = DateTime.Now,
+                CreatedDate = LinqHelper.GetDateTimeNow(),
                 AvatarFileId = post.AvatarFileId,
             };
             context.Users.Add(newUser);

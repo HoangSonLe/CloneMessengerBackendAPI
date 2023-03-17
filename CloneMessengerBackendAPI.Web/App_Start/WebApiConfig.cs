@@ -24,12 +24,13 @@ namespace CloneMessengerBackendAPI.Web
             {
                 Formatting = Formatting.Indented,
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                DateTimeZoneHandling = DateTimeZoneHandling.Local,
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
                 DateFormatString = "yyyy-MM-dd HH:mm:ss",
                 ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Error,
             };
             settings.ContractResolver = new WebSerializerSetting();
             var serializer = JsonSerializer.Create(settings);
+
             GlobalHost.DependencyResolver.Register(typeof(JsonSerializer), () => serializer);
             GlobalConfiguration.Configuration.Formatters.Remove(GlobalConfiguration.Configuration.Formatters.XmlFormatter);
             var json = GlobalConfiguration.Configuration.Formatters.JsonFormatter;

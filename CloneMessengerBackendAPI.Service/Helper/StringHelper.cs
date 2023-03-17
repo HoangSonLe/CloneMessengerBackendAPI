@@ -46,5 +46,9 @@ namespace CloneMessengerBackendAPI.Service.Helper
         {
             return time.ToString("dd/MM/yyyy");
         }
+        public static DateTime toUTCDateTime(this DateTime dateTime)
+        {
+            return dateTime.ToUniversalTime();
+        }
     }
 }

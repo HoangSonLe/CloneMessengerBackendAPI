@@ -22,7 +22,7 @@ namespace CloneMessengerBackendAPI.Model.ConfigureModel
                 return new Config();
             }
         }
-        public readonly DateTimeOffset ExpireTimeCache = new DateTimeOffset(DateTime.Now.AddHours(DefaultConfig.DefaultHourMessage * 2));
+        public readonly DateTimeOffset ExpireTimeCache = new DateTimeOffset(DateTime.Now.ToUniversalTime().AddHours(DefaultConfig.DefaultHourMessage * 2));
     }
     public static class SettingKey
     {

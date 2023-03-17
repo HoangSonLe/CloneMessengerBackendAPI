@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "mssql1": {
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourcegroups/[parameters('resourceGroupName')]/providers/Microsoft.Sql/servers/clonemessengersqldbserver/databases/CloneMessengerBackendAPI.Web_db",
+      "type": "mssql.azure",
+      "connectionId": "CloneMessengerDataContext",
+      "dynamicId": null
+    }
+  }
+}

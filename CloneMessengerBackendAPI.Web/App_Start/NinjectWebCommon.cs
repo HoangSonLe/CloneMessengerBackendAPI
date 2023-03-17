@@ -48,6 +48,7 @@ namespace CloneMessengerBackendAPI.Web.App_Start
                 kernel.Bind<IHttpModule>().To<HttpApplicationInitializationHttpModule>();
                 RegisterServices(kernel);
                 System.Web.Http.GlobalConfiguration.Configuration.Dependency‌​Resolver = new Ninject.Web.WebApi.NinjectDependencyResolver(kernel);
+                System.Web.Mvc.DependencyResolver.SetResolver(new Ninject.Web.Mvc.NinjectDependencyResolver(kernel));
                 return kernel;
             }
             catch

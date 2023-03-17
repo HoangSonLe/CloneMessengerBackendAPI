@@ -1,5 +1,6 @@
 ﻿using CloneMessengerBackendAPI.Model.ConfigureModel;
 using CloneMessengerBackendAPI.Model.Model;
+using CloneMessengerBackendAPI.Service.Helper;
 using CloneMessengerBackendAPI.Service.Models.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -39,7 +40,7 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
             var g = context.ChatGroups.Where(i=> i.Id == chatGroupId)
                                             .Include(i=> i.LastChatMessage)
                                             .FirstOrDefault();
-            var dateTime = DateTime.Now;
+            var dateTime = LinqHelper.GetDateTimeNow();
             var c = new CacheGroupModel()
             {
                 StartingTime = dateTime,
@@ -78,7 +79,7 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
             // Time : StartingGroupTime + KeyGroupByTime in Cache, SettingTime tính cho group
             // User : PreviousSendMessageUserId + KeyGroupByUser
                 
-                var dateTime = DateTime.Now;
+                var dateTime = LinqHelper.GetDateTimeNow();
                 var subTime = dateTime.Subtract(currentCache.StartingTime);
                 var settingTime = DefaultConfig.DefaultHourMessageInGroupMessage;
 
@@ -98,6 +99,8 @@ namespace CloneMessengerBackendAPI.Service.Models.BaseModels
                 }
                 else //Tạo mới group time
                 {
+                    //Gán lại time mới
+                    currentCache.StartingTime = dateTime;
                     //Tạo mới cho keyGroupTime và keyGroupUser
                     currentCache.KeyGroupByTime = Guid.NewGuid();
                     currentCache.KeyGroupByUserId = Guid.NewGuid();

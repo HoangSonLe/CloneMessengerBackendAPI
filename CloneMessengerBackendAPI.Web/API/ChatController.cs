@@ -192,7 +192,7 @@ namespace CloneMessengerBackendAPI.Web.API
                 fileAttachment.Name = Path.GetFileName(file.FileName).ToLower();
                 fileAttachment.Ext = Path.GetExtension(file.FileName);
                 fileAttachment.CreatedBy = isAnonymous == true ? null : CurrentUserId();
-                fileAttachment.CreatedDate = DateTime.Now;
+                fileAttachment.CreatedDate = DateTime.Now.ToUniversalTime();
                 fileAttachment.Data = data;
 
                 files.Add(fileAttachment);
